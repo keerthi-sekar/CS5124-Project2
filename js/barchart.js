@@ -9,8 +9,8 @@ class Barchart {
       // Configuration object with defaults
       this.config = {
         parentElement: _config.parentElement,
-        containerWidth: _config.containerWidth || 700,
-        containerHeight: _config.containerHeight || 700,
+        containerWidth: _config.containerWidth || 500,
+        containerHeight: _config.containerHeight || 500,
         margin: _config.margin || {top: 10, right: 20, bottom: 40, left: 50},
         reverseOrder: _config.reverseOrder || false,
         tooltipPadding: _config.tooltipPadding || 15,

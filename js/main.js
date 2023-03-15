@@ -29,8 +29,8 @@ d3.tsv('data/Cincy311_2022_final.tsv')
       if(d.LATITUDE && d.LONGITUDE) {
         processedData.push(d)
       }
-      var parseTime = d3.timeParse("%Y");
-      if(d.EXPECTED_DATETIME && d.REQUESTED_DATETIME && d.UPDATED_DATETIME)
+      var firstchar = d.REQUESTED_DATETIME.substring(0,1);
+      if(d.EXPECTED_DATETIME && d.REQUESTED_DATETIME && d.UPDATED_DATETIME && firstchar == '2')
       {
         var obj = {
           'Service_ID': d.SERVICE_REQUEST_ID,
@@ -56,6 +56,7 @@ d3.tsv('data/Cincy311_2022_final.tsv')
     console.log('reqobj', requestedDates);
     requested_year = d3.rollups(requestedDates, v => v.length, d => d.RequestedYear);
     requested_month = d3.rollups(requestedDates, v => v.length, d => d.RequestedMonth);
+    
     // Initialize chart and then show it
     //leafletMap = new LeafletMap({ parentElement: '#my-map'}, processedData);
     console.log(requested_year);
