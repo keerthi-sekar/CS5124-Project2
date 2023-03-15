@@ -35,7 +35,8 @@ class Barchart {
       // Initialize scales and axes
       
       // Important: we flip array elements in the y output range to position the rectangles correctly
-      vis.yScale = d3.scaleLinear()
+      vis.yScale = d3.scalePow()
+          .exponent(0.5)
           .range([vis.height, 0]); 
   
       vis.xScale = d3.scaleBand()
@@ -47,7 +48,7 @@ class Barchart {
           .tickSizeOuter(0);
   
       vis.yAxis = d3.axisLeft(vis.yScale)
-          .ticks(5)
+          .ticks(10)
           .tickSizeOuter(0)
   
       // Define size of SVG drawing area
