@@ -1,10 +1,9 @@
 
-let data, barchartA, barchartB, linechartA, scatterplot;
+let data, barchartA, barchartB, linechartA;
 
 processedData = []
 callDates = []
 requestedDates = []
-let toggleTime;
 
 //real tsv = Cincy311_2022_final.tsv
 //partial tsv = partial-data.tsv
