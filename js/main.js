@@ -54,9 +54,11 @@ d3.tsv('data/Cincy311_2022_final.tsv')
 
     //console.log(data);
     
-    console.log('reqobj', requestedDates);
+    console.log('req-obj', requestedDates);
     requested_year = d3.rollups(requestedDates, v => v.length, d => d.RequestedYear);
     requested_month = d3.rollups(requestedDates, v => v.length, d => d.RequestedMonth);
+    console.log('req-year', requested_year);
+    console.log('req-month', requested_month);
     
     // Initialize chart and then show it
     //leafletMap = new LeafletMap({ parentElement: '#my-map'}, processedData);
