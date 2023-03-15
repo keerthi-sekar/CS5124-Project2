@@ -1,9 +1,11 @@
 
-let data, barchartA;
+let data, barchartA, barchartB, linechartA, scatterplot;
 
 processedData = []
 callDates = []
 requestedDates = []
+let toggleTime;
+
 //real tsv = Cincy311_2022_final.tsv
 //partial tsv = partial-data.tsv
 d3.tsv('data/Cincy311_2022_final.tsv')
@@ -59,13 +61,25 @@ d3.tsv('data/Cincy311_2022_final.tsv')
     
     // Initialize chart and then show it
     //leafletMap = new LeafletMap({ parentElement: '#my-map'}, processedData);
-    console.log(requested_year);
+
     barchartA = new Barchart({
-			parentElement: '#barchartA',
-			xAxisTitle: 'Date'
-		  }, data, requested_year);
-		
-		barchartA.updateVis();
+      parentElement: '#barchartA',
+      xAxisTitle: 'Year'
+      }, data, requested_year);
+    
+    barchartA.updateVis();
+    
+    barchartB = new Barchart({
+      parentElement: '#barchartB',
+      xAxisTitle: 'Month'
+      }, data, requested_month);
+    
+    barchartB.updateVis();
+
+    scatterplot = new Scatterplot({
+			parentElement: '#scatterplot'
+		}, data);
+
  
   })
   .catch(error => console.error(error));

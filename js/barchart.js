@@ -136,17 +136,17 @@ class Barchart {
   
       bars
         .on('mouseover', (event,d) => {
-          d3.select('#tooltip')
+          d3.select('#bartooltip')
             .style('display', 'block')
             .style('left', (event.pageX + vis.config.tooltipPadding) + 'px')   
             .style('top', (event.pageY + vis.config.tooltipPadding) + 'px')
             .html(`
               <div class="tooltip-title">${vis.config.xAxisTitle}: ${d.key}</div>
-              <div><i>Exoplanets: ${d.count}</i></div>
+              <div>Calls: ${d.count}</div>
             `);
         })
         .on('mouseleave', () => {
-          d3.select('#tooltip').style('display', 'none');
+          d3.select('#bartooltip').style('display', 'none');
         });
       // Update axes
       vis.xAxisG.call(vis.xAxis);
