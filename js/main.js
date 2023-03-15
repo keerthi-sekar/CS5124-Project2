@@ -27,12 +27,14 @@ d3.tsv('data/Cincy311_2022_final.tsv')
       d.UPDATED_DATE = d.UPDATED_DATE;
       d.LAST_TABLE_UPDATE = d.LAST_TABLE_UPDATE;
       
-      if(d.LATITUDE && d.LONGITUDE) {
+      // Filter data by existing lat/long and exp/req daterime fields, year 2022, and service codes BLD-RES, RCYCLNG, PTHOLE, SIDWLKH, TIRES
+      var year = d.REQUESTED_DATETIME.substring(0,4);
+      if(d.LATITUDE && d.LONGITUDE && d.SERVICE_REQUEST_ID && 
+        year == '2022' && d.EXPECTED_DATETIME && d.REQUESTED_DATETIME &&
+        (d.SERVICE_CODE == '"BLD-RES"' || d.SERVICE_CODE == '"RCYCLNG"' || 
+        d.SERVICE_CODE == '"PTHOLE"' || d.SERVICE_CODE == '"SIDWLKH"' || d.SERVICE_CODE == '"TIRES"')) {
         processedData.push(d)
-      }
-      var firstchar = d.REQUESTED_DATETIME.substring(0,1);
-      if(d.EXPECTED_DATETIME && d.REQUESTED_DATETIME && d.UPDATED_DATETIME && firstchar == '2')
-      {
+
         var obj = {
           'Service_ID': d.SERVICE_REQUEST_ID,
           'Requested_Year': d.REQUESTED_DATETIME.substring(0,4),
@@ -52,7 +54,6 @@ d3.tsv('data/Cincy311_2022_final.tsv')
 
     });
 
-    //console.log(data);
     
     console.log('req-obj', requestedDates);
     requested_year = d3.rollups(requestedDates, v => v.length, d => d.RequestedYear);
@@ -61,7 +62,7 @@ d3.tsv('data/Cincy311_2022_final.tsv')
     console.log('req-month', requested_month);
     
     // Initialize chart and then show it
-    //leafletMap = new LeafletMap({ parentElement: '#my-map'}, processedData);
+    leafletMap = new LeafletMap({ parentElement: '#my-map'}, processedData);
 
     barchartA = new Barchart({
       parentElement: '#barchartA',
