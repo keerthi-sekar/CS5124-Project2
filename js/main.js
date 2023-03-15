@@ -41,13 +41,18 @@ d3.tsv('data/Cincy311_2022_final.tsv')
         }
         callDates.push(obj);
 
-        var req_date = {
-          'Service_ID': d.SERVICE_REQUEST_ID,
-          'RequestedYear': d.REQUESTED_DATETIME.substring(0,4),
-          'RequestedMonth': d.REQUESTED_DATETIME.substring(5,7),
-          'RequestedDay': d.REQUESTED_DATETIME.substring(8,10)
+        if(d.STATUS == 'OPEN' || d.STATUS == 'CLOS' || d.STATUS == 'NEW' || d.STATUS == 'PEND')
+        {
+          var req_date = {
+            'Service_ID': d.SERVICE_REQUEST_ID,
+            'Status': d.STATUS,
+            'RequestedYear': d.REQUESTED_DATETIME.substring(0,4),
+            'RequestedMonth': d.REQUESTED_DATETIME.substring(5,7),
+            'RequestedDay': d.REQUESTED_DATETIME.substring(8,10)
+          }
+          requestedDates.push(req_date);
         }
-        requestedDates.push(req_date);
+
       }
 
     });
@@ -57,8 +62,10 @@ d3.tsv('data/Cincy311_2022_final.tsv')
     console.log('req-obj', requestedDates);
     requested_year = d3.rollups(requestedDates, v => v.length, d => d.RequestedYear);
     requested_month = d3.rollups(requestedDates, v => v.length, d => d.RequestedMonth);
+    requested_status = d3.rollups(requestedDates, v => v.length, d => d.Status);
     console.log('req-year', requested_year);
     console.log('req-month', requested_month);
+    console.log('req-status', requested_status);
     
     // Initialize chart and then show it
     //leafletMap = new LeafletMap({ parentElement: '#my-map'}, processedData);
