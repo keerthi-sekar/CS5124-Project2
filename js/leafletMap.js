@@ -66,7 +66,11 @@ class LeafletMap {
                 .style('opacity', 1)
                 .style('z-index', 1000000)
                   // Format number with million and thousand separator
-                .html(`<div class="tooltip-label">Date of Call: ${d.REQUESTED_DATETIME}</div>`);
+                .html(`<div class="tooltip-label">Type of Call: ${d.SERVICE_NAME.substring(1,d.SERVICE_NAME.length - 1)}</div>
+                       <div class="tooltip-label">Description: ${d.DESCRIPTION.substring(1,d.DESCRIPTION.length - 1)}</div>
+                       <div class="tooltip-label">Date of Call: ${d.REQUESTED_DATETIME}</div>
+                       <div class="tooltip-label">Date Updated: ${d.UPDATED_DATETIME}</div>
+                       <div class="tooltip-label">Agency Responsible: ${d.AGENCY_RESPONSIBLE}</div>`);
           })
           .on('mousemove', (event) => {
             //position the tooltip
