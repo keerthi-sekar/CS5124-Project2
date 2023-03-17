@@ -1,8 +1,7 @@
 
-let data, barchartA, barchartB, linechartA;
+let data, barchartA, heatmap;
 
 processedData = []
-callDates = []
 requestedDates = []
 
 //real tsv = Cincy311_2022_final.tsv
@@ -35,14 +34,6 @@ d3.tsv('data/Cincy311_2022_final.tsv')
         d.SERVICE_CODE == '"PTHOLE"' || d.SERVICE_CODE == '"SIDWLKH"' || d.SERVICE_CODE == '"TIRES"')) {
         processedData.push(d)
 
-        var obj = {
-          'Service_ID': d.SERVICE_REQUEST_ID,
-          'Requested_Year': d.REQUESTED_DATETIME.substring(0,4),
-          'Updated_Year': d.UPDATED_DATETIME.substring(0,4),
-          'Expected_Year': d.EXPECTED_DATETIME.substring(0,4)
-        }
-        callDates.push(obj);
-
         var req_date = {
           'Service_ID': d.SERVICE_REQUEST_ID,
           'RequestedYear': d.REQUESTED_DATETIME.substring(0,4),
@@ -55,32 +46,20 @@ d3.tsv('data/Cincy311_2022_final.tsv')
     });
 
     
-    console.log('req-obj', requestedDates);
-    requested_year = d3.rollups(requestedDates, v => v.length, d => d.RequestedYear);
+    console.log('req-date', requestedDates);
     requested_month = d3.rollups(requestedDates, v => v.length, d => d.RequestedMonth);
-    console.log('req-year', requested_year);
-    console.log('req-month', requested_month);
     
     // Initialize chart and then show it
     leafletMap = new LeafletMap({ parentElement: '#my-map'}, processedData);
 
     barchartA = new Barchart({
       parentElement: '#barchartA',
-      xAxisTitle: 'Year'
-      }, data, requested_year);
-    
-    barchartA.updateVis();
-    
-    barchartB = new Barchart({
-      parentElement: '#barchartB',
       xAxisTitle: 'Month'
       }, data, requested_month);
     
-    barchartB.updateVis();
-
-    scatterplot = new Scatterplot({
-			parentElement: '#scatterplot'
-		}, data);
+    barchartA.updateVis();
+    
+    
 
  
   })
