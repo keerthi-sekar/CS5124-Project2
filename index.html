@@ -19,7 +19,19 @@
     </div>
     <br> </br>
 
-    <div id="my-map"></div>
+    <div>
+        <label style="font-size: medium">Color By: </label> 
+        <select name="subject" id="subject" >
+            <option value="1" >Call Type</option>
+            <option value="2" >Public Agency</option>
+            <option value="2" >Date</option>
+            <option value="2" >Response Time</option>
+        </select>
+        <input type="checkbox" id="AerialView" name="AerialView" value="AerialView">
+        <label style="font-size: medium" for="AerialView">Aerial View</label><br>
+        <br/>
+        <div id="my-map"></div>
+    </div>
 
     <div class="row">
         <div class="leftcolumn">

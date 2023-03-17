@@ -43,11 +43,14 @@ class LeafletMap {
      vis.overlay = d3.select(vis.theMap.getPanes().overlayPane)
      vis.svg = vis.overlay.select('svg').attr("pointer-events", "auto")
 
+     vis.colorScale = d3.scaleOrdinal().range(d3.schemeCategory10)
+     .domain(['"BLD-RES"','"RCYCLNG"', '"PTHOLE"', '"SIDWLKH"', '"TIRES"']);
+
       //these are the city locations, displayed as a set of dots 
       vis.Dots = vis.svg.selectAll('circle')
       .data(vis.data) 
       .join('circle')
-          .attr("fill", "steelblue") 
+          .attr("fill", d => vis.colorScale(d.SERVICE_CODE)) 
           .attr("stroke", "black")
           //Leaflet has to take control of projecting points. Here we are feeding the latitude and longitude coordinates to
           //leaflet so that it can project them on the coordinates of the view. Notice, we have to reverse lat and lon.
@@ -58,7 +61,8 @@ class LeafletMap {
           .on('mouseover', function(event,d) { //function to add mouseover event
             d3.select(this).transition() //D3 selects the object we have moused over in order to perform operations on it
               .duration('150') //how long we are transitioning between the two states (works like keyframes)
-              .attr("fill", "red") //change the fill
+              .attr("stroke", "gold")
+              .attr("stroke-width", "3px")
               .attr('r', 8) //change radius
 
             //create a tool tip
@@ -81,7 +85,8 @@ class LeafletMap {
           .on('mouseleave', function() { //reverse the action based on when we mouse off the the circle
             d3.select(this).transition()
               .duration('150')
-              .attr("fill", "steelblue")
+              .attr("stroke", "black")
+              .attr("stroke-width", "1px")
               .attr('r', 3)
             d3.select('#tooltip').style('opacity', 0);//turn off the tooltip
           });;
