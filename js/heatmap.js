@@ -5,7 +5,7 @@ class Heatmap {
      * @param {Object}
      * @param {Array}
      */
-    constructor(_config, _data, _map) {
+    constructor(_config, _data, _xgroup, _ygroup) {
       // Configuration object with defaults
       this.config = {
         parentElement: _config.parentElement,
@@ -18,7 +18,8 @@ class Heatmap {
         yAxisTitle: _config.yAxisTitle || 'Calls',
       }
       this.data = _data;
-      this.num_map = _map;
+      this.xGroup = _xgroup;
+      this.yGroup = _ygroup;
       this.initVis();
     }
     
@@ -31,24 +32,26 @@ class Heatmap {
       // Calculate inner chart size. Margin specifies the space around the actual chart.
       vis.width = vis.config.containerWidth - vis.config.margin.left - vis.config.margin.right;
       vis.height = vis.config.containerHeight - vis.config.margin.top - vis.config.margin.bottom;
+
+      let x_keys = this.xGroup.keys();
+      let y_keys = this.yGroup.keys();
   
       // Initialize scales and axes
       
       // Important: we flip array elements in the y output range to position the rectangles correctly
-      vis.yScale = d3.scaleLinear()
-          .range([vis.height, 0]); 
+      vis.yScale = d3.scaleBand()
+          .range([vis.height, 0])
+          .domain(y_keys)
+          .paddingInner(0.2); 
   
       vis.xScale = d3.scaleBand()
           .range([0, vis.width])
+          .domain(x_keys)
           .paddingInner(0.2);
   
-      vis.xAxis = d3.axisBottom(vis.xScale)
-          .ticks(data)
-          .tickSizeOuter(0);
+      vis.xAxis = d3.axisBottom(vis.xScale);
   
-      vis.yAxis = d3.axisLeft(vis.yScale)
-          .ticks(5)
-          .tickSizeOuter(0)
+      vis.yAxis = d3.axisLeft(vis.yScale);
   
       // Define size of SVG drawing area
       vis.svg = d3.select(vis.config.parentElement)
@@ -68,6 +71,10 @@ class Heatmap {
       // Append y-axis group 
       vis.yAxisG = vis.chart.append('g')
           .attr('class', 'axis y-axis');
+
+      vis.myColor = d3.scaleLinear()
+        .range(["white", "#69b3a2"])
+        .domain([1,10]);
   
       // Append axis title
       vis.chart.append('text')
@@ -78,12 +85,12 @@ class Heatmap {
           .text(vis.config.yAxisTitle);
   
       vis.chart.append('text') //x-axis = radius [dist]
-      .attr('class', 'axis-title')
-      .attr('y', vis.height + 25)
-      .attr('x', vis.width + 5)
-      .attr('dy', '.71em')
-      .style('text-anchor', 'end')
-      .text(vis.config.xAxisTitle);
+        .attr('class', 'axis-title')
+        .attr('y', vis.height + 25)
+        .attr('x', vis.width + 5)
+        .attr('dy', '.71em')
+        .style('text-anchor', 'end')
+        .text(vis.config.xAxisTitle);
     }
   
     /**
@@ -102,7 +109,26 @@ class Heatmap {
      */
     renderVis() {
       let vis = this;
-  
+        
+      const square = vis.chart.selectAll('.rect')
+            .data(data, function(d) {return d.ServiceCode+':'+d.Status;})
+            .enter()
+        .join("rect")
+            .attr("x", function(d) { return x(d.ServiceCode) })
+            .attr("y", function(d) { return y(d.Status) })
+            .attr("width", x.bandwidth() )
+            .attr("height", y.bandwidth() )
+            //.style("fill", function(d) { return myColor(d.value)} )
+      square
+        .on('mouseover', (event,d) => {
+            d3.select('#tooltip')
+            .html("The exact value of<br>this cell is: " + d.ServiceCode)
+            .style("left", (event.x)/2 + "px")
+            .style("top", (event.y)/2 + "px")
+        })
+        .on('mouseleave', () => {
+            d3.select('#tooltip').style('display', 'none');
+        });
       
       // Update axes
       vis.xAxisG.call(vis.xAxis);

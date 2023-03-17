@@ -36,6 +36,8 @@ d3.tsv('data/Cincy311_2022_final.tsv')
 
         var req_date = {
           'Service_ID': d.SERVICE_REQUEST_ID,
+          'Status': d.STATUS,
+          'ServiceCode': d.SERVICE_CODE,
           'RequestedYear': d.REQUESTED_DATETIME.substring(0,4),
           'RequestedMonth': d.REQUESTED_DATETIME.substring(5,7),
           'RequestedDay': d.REQUESTED_DATETIME.substring(8,10)
@@ -48,7 +50,10 @@ d3.tsv('data/Cincy311_2022_final.tsv')
     
     console.log('req-date', requestedDates);
     requested_month = d3.rollups(requestedDates, v => v.length, d => d.RequestedMonth);
-    
+
+    status_group = d3.group(requestedDates, d => d.Status);
+    service_type_group = d3.group(requestedDates, d => d.ServiceCode);
+
     // Initialize chart and then show it
     leafletMap = new LeafletMap({ parentElement: '#my-map'}, processedData);
 
@@ -59,7 +64,9 @@ d3.tsv('data/Cincy311_2022_final.tsv')
     
     barchartA.updateVis();
     
-    
+    heatmap = new Heatmap({
+      parentElement: '#heatmap'
+    }, requestedDates, service_type_group, status_group);
 
  
   })
