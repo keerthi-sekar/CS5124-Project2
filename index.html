@@ -33,16 +33,23 @@
 
     <div class="row">
         <div class="middlecolumn">
-        <p>Map</p>
+        <p>HeatMap</p>
+        <svg id="heatmap"></svg>
+        <div id="tooltip"></div>
         </div>
     </div>
 
     <div class="row">
         <div class="rightcolumn">
         <div>
-            <p>Overall Calls Placed within 1 Year</p>
-            <svg id="heatmap"></svg>
-            <div id="tooltip"></div>
+            <p>TBD</p>
+            <select id="selectGraph">
+                <option value="sc">Service Code</option>
+                <option value="serviceStatus">Status</option>
+            </select>
+            <br></br>
+            <svg id="barchartB"></svg>
+            <div id="bartooltip"></div>
         </div>
         </div>
     </div>

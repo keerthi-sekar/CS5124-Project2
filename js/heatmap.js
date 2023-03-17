@@ -99,8 +99,6 @@ class Heatmap {
     updateVis() {
       let vis = this;
   
-      
-  
       vis.renderVis();
     }
   
@@ -111,9 +109,9 @@ class Heatmap {
       let vis = this;
         
       const square = vis.chart.selectAll('.rect')
-            .data(data, function(d) {return d.ServiceCode+':'+d.Status;})
+            .data(this.data, function(d) {return d.ServiceCode+':'+d.Status;})
             .enter()
-        .join("rect")
+        .append("rect")
             .attr("x", function(d) { return x(d.ServiceCode) })
             .attr("y", function(d) { return y(d.Status) })
             .attr("width", x.bandwidth() )

@@ -148,6 +148,7 @@ class Barchart {
         .on('mouseleave', () => {
           d3.select('#bartooltip').style('display', 'none');
         });
+
       // Update axes
       vis.xAxisG.call(vis.xAxis);
       vis.yAxisG.call(vis.yAxis);
