@@ -50,6 +50,15 @@ d3.tsv('data/Cincy311_2022_final.tsv')
           'RequestedDay': d.REQUESTED_DATETIME.substring(8,10)
         }
         requestedDates.push(req_date);
+
+        const date1 = new Date(d.REQUESTED_DATETIME)
+        const date2 = new Date(d.UPDATED_DATETIME)
+        // To calculate the time difference of two dates
+        var Difference_In_Time = date2.getTime() - date1.getTime();
+        // To calculate the no. of days between two dates
+        var Difference_In_Days = Difference_In_Time / (1000 * 3600 * 24);
+        // console.log(Difference_In_Days)
+        d.RESPONSE_TIME = Difference_In_Days
       }
 
     });
@@ -96,6 +105,7 @@ function aerialClick(cb) {
 }
 
 function colorChange() {
+  document.getElementById("legend").innerHTML = ''; 
   var val = document.getElementById("colorBy").value;
-  console.log(val)
+  leafletMap.updateColor(val)
 }
