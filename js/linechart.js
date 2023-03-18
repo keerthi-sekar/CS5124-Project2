@@ -106,7 +106,7 @@ class LineChart {
   updateVis() {
     let vis = this;
     
-    vis.xValue = d => new Date(parseInt(d[0]),0);
+    vis.xValue = d => new Date(d[0]);
     vis.yValue = d => d[1];
 
     vis.line = d3.line()

@@ -44,6 +44,7 @@ d3.tsv('data/Cincy311_2022_final.tsv')
           'Service_ID': d.SERVICE_REQUEST_ID,
           'Status': d.STATUS,
           'ServiceCode': parsed_finalServiceCode,
+          'DATETIME': d.REQUESTED_DATETIME,
           'RequestedYear': d.REQUESTED_DATETIME.substring(0,4),
           'UpdatedYear': d.UPDATED_DATETIME.substring(0,4),
           'RequestedMonth': d.REQUESTED_DATETIME.substring(5,7),
@@ -60,7 +61,8 @@ d3.tsv('data/Cincy311_2022_final.tsv')
     });
 
     
-    console.log('req-date', requestedDates);
+    console.log('req-date', data);
+    requested_fulldate = d3.rollups(requestedDates, v => v.length, d => d.DATETIME);
     requested_month = d3.rollups(requestedDates, v => v.length, d => d.RequestedMonth);
     requested_day = d3.rollups(requestedDates, v => v.length, d => d.RequestedDay);
     updated_month = d3.rollups(requestedDates, v => v.length, d => d.UpdatedMonth);
@@ -69,9 +71,7 @@ d3.tsv('data/Cincy311_2022_final.tsv')
     zipcode_rollup = d3.rollups(requestedDates, v => v.length, d => d.Zipcode);
     agency_rollup = d3.rollups(requestedDates, v => v.length, d => d.Agency);
 
-    status_group = d3.group(requestedDates, d => d.Status);
-    service_type_group = d3.group(requestedDates, d => d.ServiceCode);
-    zipcode_group =  d3.group(requestedDates, d => d.Zipcode);
+    console.log(requested_fulldate);
 
     // Initialize chart and then show it
     leafletMap = new LeafletMap({ parentElement: '#my-map'}, processedData);
@@ -92,7 +92,7 @@ d3.tsv('data/Cincy311_2022_final.tsv')
 
     linechartA = new LineChart({
       parentElement: '#linechartA'
-    }, requested_month)
+    }, requested_fulldate)
  
   })
   .catch(error => console.error(error));
