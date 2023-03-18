@@ -19,7 +19,22 @@
     </div>
     <br> </br>
 
-    <div id="my-map"></div>
+    <div>
+        <label style="font-size: medium">Color By: </label> 
+        <select name="colorBy" id="colorBy" onchange="colorChange()">
+            <option value="Call" >Call Type</option>
+            <option value="Agency" >Public Agency</option>
+            <option value="Date" >Date</option>
+            <option value="Response" >Response Time</option>
+        </select>
+        <input type="checkbox" id="AerialView" name="AerialView" value="AerialView" onchange="aerialClick(this)">
+        <label style="font-size: medium" for="AerialView">Aerial View</label><br>
+        <br/>
+        <div style="display: flex; ">
+            <div id="my-map"></div>
+            <div id="legend"></div>
+        </div>
+    </div>
 
     <div class="row">
         <div class="leftcolumn">

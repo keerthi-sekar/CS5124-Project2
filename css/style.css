@@ -10,8 +10,12 @@ li {
 }
 
 #my-map {
-  width: 100%;
+  width: 80%;
   height: 500px;
+}
+
+#legend svg {
+  height: 500px; 
 }
 
 #tooltip {
