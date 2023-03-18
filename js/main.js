@@ -1,5 +1,5 @@
 
-let data, barchartA, barchartB, linechartA;
+let data, barchartA, barchartB, linechartA, leafletMap;
 
 processedData = []
 callDates = []
@@ -85,3 +85,17 @@ d3.tsv('data/Cincy311_2022_final.tsv')
  
   })
   .catch(error => console.error(error));
+
+function aerialClick(cb) {
+    if(cb.checked) {
+      leafletMap.updateToAerial();
+    }
+    else {
+      leafletMap.updateToBase();
+    }
+}
+
+function colorChange() {
+  var val = document.getElementById("colorBy").value;
+  console.log(val)
+}

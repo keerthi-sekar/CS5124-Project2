@@ -19,16 +19,28 @@ class LeafletMap {
   initVis() {
     let vis = this;
 
-    //ESRI
+    //ESRI (Aerial)
     vis.esriUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
     vis.esriAttr = 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community';
 
+    //Voyager
+    vis.voyagerUrl = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+    vis.voyagerAttr = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
+
+
     //this is the base map layer, where we are showing the map background
-    vis.base_layer = L.tileLayer(vis.esriUrl, {
+    vis.base_layer = L.tileLayer(vis.voyagerUrl, {
       id: 'esri-image',
-      attribution: vis.esriAttr,
+      attribution: vis.voyagerAttr,
       ext: 'png'
     });
+
+    vis.aerial_layer = L.tileLayer(vis.esriUrl, {
+      id: 'esri-image',
+      attribution: vis.voyagerAttr,
+      ext: 'png'
+    });
+
 
     vis.theMap = L.map('my-map', {
       center: [30, 0],
@@ -108,6 +120,18 @@ class LeafletMap {
       .attr("cy", d => vis.theMap.latLngToLayerPoint([d.LATITUDE,d.LONGITUDE]).y)
       .attr("r", 3) ;
 
+  }
+
+  updateToAerial() {
+    let vis = this;
+    vis.theMap.removeLayer(vis.base_layer)
+    vis.theMap.addLayer(vis.aerial_layer)
+  }
+
+  updateToBase() {
+    let vis = this;
+    vis.theMap.removeLayer(vis.aerial_layer)
+    vis.theMap.addLayer(vis.base_layer)
   }
 
 

@@ -21,13 +21,13 @@
 
     <div>
         <label style="font-size: medium">Color By: </label> 
-        <select name="subject" id="subject" >
-            <option value="1" >Call Type</option>
-            <option value="2" >Public Agency</option>
-            <option value="2" >Date</option>
-            <option value="2" >Response Time</option>
+        <select name="colorBy" id="colorBy" onchange="colorChange()">
+            <option value="Call" >Call Type</option>
+            <option value="Agency" >Public Agency</option>
+            <option value="Date" >Date</option>
+            <option value="Response" >Response Time</option>
         </select>
-        <input type="checkbox" id="AerialView" name="AerialView" value="AerialView">
+        <input type="checkbox" id="AerialView" name="AerialView" value="AerialView" onchange="aerialClick(this)">
         <label style="font-size: medium" for="AerialView">Aerial View</label><br>
         <br/>
         <div id="my-map"></div>
