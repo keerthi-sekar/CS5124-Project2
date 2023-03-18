@@ -50,7 +50,8 @@ d3.tsv('data/Cincy311_2022_final.tsv')
           'UpdatedMonth': d.UPDATED_DATETIME.substring(5,7),
           'RequestedDay': d.REQUESTED_DATETIME.substring(8,10),
           'UpdatedDay': d.UPDATED_DATETIME.substring(8,10),
-          'Zipcode': d.ZIPCODE
+          'Zipcode': d.ZIPCODE,
+          'Agency': d.AGENCY_RESPONSIBLE
         }
         requestedDates.push(req_date);
         zipcodes.push(d.Zipcode);
@@ -66,6 +67,7 @@ d3.tsv('data/Cincy311_2022_final.tsv')
     service_code_group = d3.rollups(requestedDates, v => v.length, d => d.ServiceCode);
     status_rollup = d3.rollups(requestedDates, v => v.length, d => d.Status);
     zipcode_rollup = d3.rollups(requestedDates, v => v.length, d => d.Zipcode);
+    agency_rollup = d3.rollups(requestedDates, v => v.length, d => d.Agency);
 
     status_group = d3.group(requestedDates, d => d.Status);
     service_type_group = d3.group(requestedDates, d => d.ServiceCode);
@@ -100,6 +102,11 @@ d3.tsv('data/Cincy311_2022_final.tsv')
     {
       barchartB.num_map = service_code_group;
       barchartB.xAxisTitle = 'Service Code';
+    }
+    else if(selectedOption == 'agency')
+    {
+      barchartB.num_map = agency_rollup;
+      barchartB.xAxisTitle = 'Agency';
     }
     else
     {
