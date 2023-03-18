@@ -1,9 +1,8 @@
 
-let data, barchartA, barchartB, heatmap, histogramA, linechartA;
+let data, barchartA, barchartB, linechartA;
 
 processedData = []
 requestedDates = []
-zipcodes = []
 
 //real tsv = Cincy311_2022_final.tsv
 //partial tsv = partial-data.tsv
@@ -55,7 +54,6 @@ d3.tsv('data/Cincy311_2022_final.tsv')
           'Agency': d.AGENCY_RESPONSIBLE
         }
         requestedDates.push(req_date);
-        zipcodes.push(d.Zipcode);
       }
 
     });
@@ -65,7 +63,6 @@ d3.tsv('data/Cincy311_2022_final.tsv')
     requested_fulldate = d3.rollups(requestedDates, v => v.length, d => d.DATETIME);
     requested_month = d3.rollups(requestedDates, v => v.length, d => d.RequestedMonth);
     requested_day = d3.rollups(requestedDates, v => v.length, d => d.RequestedDay);
-    updated_month = d3.rollups(requestedDates, v => v.length, d => d.UpdatedMonth);
     service_code_group = d3.rollups(requestedDates, v => v.length, d => d.ServiceCode);
     status_rollup = d3.rollups(requestedDates, v => v.length, d => d.Status);
     zipcode_rollup = d3.rollups(requestedDates, v => v.length, d => d.Zipcode);
