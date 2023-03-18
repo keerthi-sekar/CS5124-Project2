@@ -1,8 +1,9 @@
 
-let data, barchartA, barchartB, heatmap;
+let data, barchartA, barchartB, heatmap, histogramA;
 
 processedData = []
 requestedDates = []
+zipcodes = []
 
 //real tsv = Cincy311_2022_final.tsv
 //partial tsv = partial-data.tsv
@@ -44,10 +45,15 @@ d3.tsv('data/Cincy311_2022_final.tsv')
           'Status': d.STATUS,
           'ServiceCode': parsed_finalServiceCode,
           'RequestedYear': d.REQUESTED_DATETIME.substring(0,4),
+          'UpdatedYear': d.UPDATED_DATETIME.substring(0,4),
           'RequestedMonth': d.REQUESTED_DATETIME.substring(5,7),
-          'RequestedDay': d.REQUESTED_DATETIME.substring(8,10)
+          'UpdatedMonth': d.UPDATED_DATETIME.substring(5,7),
+          'RequestedDay': d.REQUESTED_DATETIME.substring(8,10),
+          'UpdatedDay': d.UPDATED_DATETIME.substring(8,10),
+          'Zipcode': d.ZIPCODE
         }
         requestedDates.push(req_date);
+        zipcodes.push(d.Zipcode);
       }
 
     });
@@ -55,27 +61,25 @@ d3.tsv('data/Cincy311_2022_final.tsv')
     
     console.log('req-date', requestedDates);
     requested_month = d3.rollups(requestedDates, v => v.length, d => d.RequestedMonth);
+    requested_day = d3.rollups(requestedDates, v => v.length, d => d.RequestedDay);
+    updated_month = d3.rollups(requestedDates, v => v.length, d => d.UpdatedMonth);
     service_code_group = d3.rollups(requestedDates, v => v.length, d => d.ServiceCode);
     status_rollup = d3.rollups(requestedDates, v => v.length, d => d.Status);
+    zipcode_rollup = d3.rollups(requestedDates, v => v.length, d => d.Zipcode);
 
     status_group = d3.group(requestedDates, d => d.Status);
     service_type_group = d3.group(requestedDates, d => d.ServiceCode);
+    zipcode_group =  d3.group(requestedDates, d => d.Zipcode);
 
     // Initialize chart and then show it
     leafletMap = new LeafletMap({ parentElement: '#my-map'}, processedData);
 
     barchartA = new Barchart({
       parentElement: '#barchartA',
-      xAxisTitle: 'Month'
+      xAxisTitle: 'Time'
       }, data, requested_month);
     
     barchartA.updateVis();
-    
-    /* heatmap = new Heatmap({
-      parentElement: '#heatmap'
-    }, requestedDates, service_type_group, status_group);
-
-    heatmap.updateVis(); */
 
     barchartB = new Barchart({
       parentElement: '#barchartB',
@@ -83,7 +87,6 @@ d3.tsv('data/Cincy311_2022_final.tsv')
       }, data, service_code_group);
     
     barchartB.updateVis();
-
  
   })
   .catch(error => console.error(error));
@@ -105,4 +108,21 @@ d3.tsv('data/Cincy311_2022_final.tsv')
     }
 
     barchartB.updateVis();
+  })
+
+  d3.select("#timeGraph").on("change", function(d) {
+    // recover the option that has been chosen
+    var selectedOption = d3.select(this).property("value")
+    
+    if(selectedOption == 'month')
+    {
+      barchartA.num_map = requested_month;
+      
+    }
+    else
+    {
+      barchartA.num_map = requested_day;
+    }
+
+    barchartA.updateVis();
 })

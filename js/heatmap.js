@@ -14,8 +14,8 @@ class Heatmap {
         margin: _config.margin || {top: 10, right: 20, bottom: 40, left: 50},
         reverseOrder: _config.reverseOrder || false,
         tooltipPadding: _config.tooltipPadding || 15,
-        xAxisTitle: _config.xAxisTitle || 'NaN',
-        yAxisTitle: _config.yAxisTitle || 'Calls',
+        xAxisTitle: _config.xAxisTitle || 'Service Code',
+        yAxisTitle: _config.yAxisTitle || 'ZipCode',
       }
       this.data = _data;
       this.xGroup = _xgroup;
@@ -72,9 +72,9 @@ class Heatmap {
       vis.yAxisG = vis.chart.append('g')
           .attr('class', 'axis y-axis');
 
-      vis.myColor = d3.scaleLinear()
-        .range(["white", "#69b3a2"])
-        .domain([1,10]);
+      var colors = ['#00876c', '#419b73', '#68af7a', '#8dc282', '#b2d58c', '#fffaa8', '#fcdd89', '#f8bf70', '#f3a15e', '#ec8253', '#e26150', '#d43d51'];
+      vis.zScale = d3.scaleQuantile()
+        .range(colors);
   
       // Append axis title
       vis.chart.append('text')
@@ -91,6 +91,8 @@ class Heatmap {
         .attr('dy', '.71em')
         .style('text-anchor', 'end')
         .text(vis.config.xAxisTitle);
+
+      
     }
   
     /**
@@ -109,18 +111,22 @@ class Heatmap {
       let vis = this;
         
       const square = vis.chart.selectAll('.rect')
-            .data(this.data, function(d) {return d.ServiceCode+':'+d.Status;})
-            .enter()
-        .append("rect")
-            .attr("x", function(d) { return x(d.ServiceCode) })
-            .attr("y", function(d) { return y(d.Status) })
+            .data(this.data, function(d) {return d.ServiceCode+':'+d.Zipcode;})
+            .enter()  
+            .classed('squares', true)
+            .attr('transform', 'translate(2,2)')
+            .attr("fill", this.zScale(d.Zipcode))
+            .attr('stroke', "black")
+            .selectAll('rect')
+            .data(dataset)
+            .join('rect')
             .attr("width", x.bandwidth() )
             .attr("height", y.bandwidth() )
             //.style("fill", function(d) { return myColor(d.value)} )
       square
         .on('mouseover', (event,d) => {
             d3.select('#tooltip')
-            .html("The exact value of<br>this cell is: " + d.ServiceCode)
+            .html("The exact value of<br>this cell is: ")
             .style("left", (event.x)/2 + "px")
             .style("top", (event.y)/2 + "px")
         })

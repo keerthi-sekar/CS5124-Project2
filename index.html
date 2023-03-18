@@ -25,6 +25,11 @@
         <div class="leftcolumn">
         <div>
             <p>All Time Calls Placed Over 2022 </p>
+            <select id="timeGraph" style="font-size: large;">
+                <option value="month">Month</option>
+                <option value="day">Day</option>
+            </select>
+            <br></br>
             <svg id="barchartA"></svg>
             <div id="bartooltip"></div>
         </div>
@@ -54,6 +59,7 @@
         </div>
     </div>
 
+    <br></br>
 
     <script src="js/d3.v6.min.js"></script>
     <script src="js/leaflet.js"></script>
@@ -61,7 +67,7 @@
     <script src="js/leafletMap.js"></script>
     <script src="js/barchart.js"></script>
     <script src="js/linechart.js"></script>
-    <script src="js/heatmap.js"></script>
+    <script src="js/histogram.js"></script>
 
     <div id="tooltip"></div>
 

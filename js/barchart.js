@@ -83,7 +83,7 @@ class Barchart {
       .attr('x', vis.width + 5)
       .attr('dy', '.71em')
       .style('text-anchor', 'end')
-      .text(vis.config.xAxisTitle);
+      //.text(vis.config.xAxisTitle);
     }
   
     /**
