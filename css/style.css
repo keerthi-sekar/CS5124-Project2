@@ -14,18 +14,33 @@ li {
   height: 500px;
 }
 
+#tooltip {
+  position: absolute;
+  opacity: 0;
+  background: #fff;
+  box-shadow: 2px 2px 3px 0px rgb(92 92 92 / 0.5);
+  border: 1px solid #ddd;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+}
+.tooltip-label {
+  font-weight: 500;
+  font-size: 10px;
+  color: #888;
+}
+
 #bartooltip {
   position: absolute;
-  display: none;
+  opacity: 0;
   background: #fff;
-  box-shadow: 3px 3px 3px 0px rgb(92 92 92 / 0.5);
+  box-shadow: 2px 2px 3px 0px rgb(92 92 92 / 0.5);
   border: 1px solid #ddd;
-  font-size: 14px;
-  font-weight: 500;
-  padding: 8px;
-  min-width: 160px;
-  color: #333;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
 }
+
 .tooltip-title {
   color: #000;
   font-size: 16px;

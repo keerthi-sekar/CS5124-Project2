@@ -1,5 +1,5 @@
 
-let data, barchartA, barchartB, heatmap, histogramA;
+let data, barchartA, barchartB, heatmap, histogramA, linechartA;
 
 processedData = []
 requestedDates = []
@@ -89,6 +89,10 @@ d3.tsv('data/Cincy311_2022_final.tsv')
       }, data, service_code_group);
     
     barchartB.updateVis();
+
+    linechartA = new LineChart({
+      parentElement: '#linechartA'
+    }, requested_month)
  
   })
   .catch(error => console.error(error));
