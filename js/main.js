@@ -87,9 +87,16 @@ d3.tsv('data/Cincy311_2022_final.tsv')
     
     barchartB.updateVis();
 
+    requested_fulldate.sort(function(a,b){
+      // Turn your strings into dates, and then subtract them
+      // to get a value that is either negative, positive, or zero.
+      return new Date(b[0]) - new Date(a[0]);
+    });
+    console.log(requested_fulldate);
     linechartA = new LineChart({
       parentElement: '#linechartA'
     }, requested_fulldate)
+    linechartA.updateVis();
  
   })
   .catch(error => console.error(error));

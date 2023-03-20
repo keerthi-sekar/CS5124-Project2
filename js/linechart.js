@@ -8,9 +8,9 @@ class LineChart {
   constructor(_config, _data) {
     this.config = {
       parentElement: _config.parentElement,
-      containerWidth: _config.containerWidth || 500,
+      containerWidth: _config.containerWidth || 600,
       containerHeight: _config.containerHeight || 500,
-      margin: _config.margin || {top: 60, right: 30, bottom: 50, left: 80}
+      margin: _config.margin || {top: 20, right: 20, bottom: 30, left: 50}
     }
     this.data = _data;
     this.initVis();
@@ -25,7 +25,7 @@ class LineChart {
     vis.width = vis.config.containerWidth - vis.config.margin.left - vis.config.margin.right;
     vis.height = vis.config.containerHeight - vis.config.margin.top - vis.config.margin.bottom;
 
-    vis.xScale = d3.scaleTime()
+    vis.xScale = d3.scaleUtc()
         .range([0, vis.width]);
 
     vis.yScale = d3.scaleLinear()
@@ -34,7 +34,7 @@ class LineChart {
 
     // Initialize axes
     vis.xAxis = d3.axisBottom(vis.xScale)
-        .ticks(6)
+        // .ticks(6)
         .tickSizeOuter(0)
         .tickPadding(10)
 
@@ -114,6 +114,7 @@ class LineChart {
         .y(d => vis.yScale(vis.yValue(d)));
 
     // Set the scale input domains
+    console.log(vis.data)
     vis.xScale.domain(d3.extent(vis.data, vis.xValue));
     vis.yScale.domain(d3.extent(vis.data, vis.yValue));
 
@@ -158,13 +159,15 @@ class LineChart {
         const a = dataArray[index - 1];
         const b = dataArray[index];
         const d = b && (date - a[0] > b[0] - date) ? b : a; 
+        
+
 
         // Update tooltip
         vis.tooltip.select('circle')
-            .attr('transform', `translate(${vis.xScale(new Date(parseInt(d[0]),0))},${vis.yScale(d[1])})`);
+            .attr('transform', `translate(${vis.xScale(vis.xValue(d))},${vis.yScale(d[1])})`);
         
         vis.tooltip.select('text')
-            .attr('transform', `translate(${vis.xScale(new Date(parseInt(d[0]),0))},${(vis.yScale(d[1]) - 15)})`)
+            .attr('transform', `translate(${vis.xScale(vis.xValue(d))},${(vis.yScale(d[1]) - 15)})`)
             .text(Math.round(d[1]));
       });
 

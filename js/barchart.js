@@ -122,7 +122,21 @@ class Barchart {
      */
     renderVis() {
       let vis = this;
-  
+
+          // create tooltip element  
+          const tooltip = d3.select("body")
+          .append("div")
+          .style("position", "absolute")
+          .style("z-index", "10")
+          .style("visibility", "hidden")
+          .style("padding", "2px 8px")
+          .style("background", "#fff")
+          .style("border", "1px solid #ddd")
+          .style("width", "100px")
+          .style("box-shadow", "2px 2px 3px 0px rgb(92 92 92 / 0.5)")
+          .style("font-size", "12px")
+          .style("font-weight", "600");
+        
       // Add rectangles
       const bars = vis.chart.selectAll('.bar')
           .data(vis.aggregatedData, vis.xValue)
@@ -136,18 +150,29 @@ class Barchart {
   
       bars
         .on('mouseover', (event,d) => {
-          d3.select('#tooltip')
-            .style('display', 'block')
-            .style('left', (event.pageX + vis.config.tooltipPadding) + 'px')   
-            .style('top', (event.pageY + vis.config.tooltipPadding) + 'px')
-            .html(`
-            <div class="tooltip-label">${d.key}</div>
-              <div class="tooltip-label">Calls: ${d.count}</div>
-            `);
+          // d3.select('#bartooltip')
+          //   .style('display', 'block')
+          //   .style('left', (event.pageX + vis.config.tooltipPadding) + 'px')   
+          //   .style('top', (event.pageY + vis.config.tooltipPadding) + 'px')
+          //   .html(`
+            // <div class="tooltip-label">${d.key}</div>
+            //   <div class="tooltip-label">Calls: ${d.count}</div>
+          //   `);
+          tooltip.html(`<div class="tooltip-title">${d.key}</div>
+          <div class="tooltip-label">Calls: ${d.count}</div>`).style("visibility", "visible");
         })
-        .on('mouseleave', () => {
-          d3.select('#tooltip').style('display', 'none');
+        .on("mousemove", function(){
+          tooltip
+            .style("top", (event.pageY-10)+"px")
+            .style("left",(event.pageX+10)+"px");
+        })
+        .on("mouseout", function() {
+          tooltip.html(``).style("visibility", "hidden");
+          // d3.select(this).attr("fill", colorScale);
         });
+        // .on('mouseleave', () => {
+        //   d3.select('#bartooltip').style('display', 'none');
+        // });
 
       // Update axes
       vis.xAxisG.call(vis.xAxis);

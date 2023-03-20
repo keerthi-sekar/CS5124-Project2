@@ -29,7 +29,7 @@ li {
   font-size: 10px;
   color: #888;
 }
-
+/* 
 #bartooltip {
   position: absolute;
   opacity: 0;
@@ -39,7 +39,7 @@ li {
   font-size: 12px;
   font-weight: 600;
   padding: 2px 8px;
-}
+} */
 
 .tooltip-title {
   color: #000;
