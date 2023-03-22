@@ -149,3 +149,18 @@ d3.tsv('data/Cincy311_2022_final.tsv')
 
     barchartA.updateVis();
 })
+
+function aerialClick(cb) {
+  if(cb.checked) {
+    leafletMap.updateToAerial();
+  }
+  else {
+    leafletMap.updateToBase();
+  }
+}
+
+function colorChange() {
+document.getElementById("legend").innerHTML = ''; 
+var val = document.getElementById("colorBy").value;
+leafletMap.updateColor(val)
+}
