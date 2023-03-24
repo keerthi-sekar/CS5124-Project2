@@ -39,29 +39,40 @@
     <div class="row">
         <div class="leftcolumn">
         <div>
-            <p>All Time Calls Placed</p>
+            <p>All Time Calls Placed Over 2022 </p>
+            <select id="timeGraph" style="font-size: large;">
+                <option value="month">Month</option>
+                <option value="day">Day</option>
+            </select>
+            <br></br>
             <svg id="barchartA"></svg>
-            <div id="bartooltip"></div>
         </div>
         </div>
     </div>
 
     <div class="row">
         <div class="middlecolumn">
-        <p>Map</p>
+        <p>[]</p>
+        <svg id="linechartA"></svg>
         </div>
     </div>
 
     <div class="row">
         <div class="rightcolumn">
         <div>
-            <p>Overall Calls Placed within 1 Year</p>
+            <p>Categories</p>
+            <select id="selectGraph" style="font-size: large;">
+                <option value="sc">Service Code</option>
+                <option value="serviceStatus">Status</option>
+                <option value="agency">Agency Responsible</option>
+            </select>
+            <br></br>
             <svg id="barchartB"></svg>
-            <div id="tooltip"></div>
         </div>
         </div>
     </div>
 
+    <br></br>
 
     <script src="js/d3.v6.min.js"></script>
     <script src="js/leaflet.js"></script>
@@ -69,7 +80,6 @@
     <script src="js/leafletMap.js"></script>
     <script src="js/barchart.js"></script>
     <script src="js/linechart.js"></script>
-    <script src="js/scatterplot.js"></script>
 
     <div id="tooltip"></div>
 
