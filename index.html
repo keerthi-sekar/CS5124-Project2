@@ -31,8 +31,8 @@
         <label style="font-size: medium" for="AerialView">Aerial View</label><br>
         <br/>
         <div style="display: flex; ">
-            <div id="my-map"></div>
-            <div id="legend"></div>
+            <div class="map" id="my-map"></div>
+            <div class="legend" id="legend"></div>
         </div>
     </div>
 
@@ -48,16 +48,6 @@
             <svg id="barchartA"></svg>
         </div>
         </div>
-    </div>
-
-    <div class="row">
-        <div class="middlecolumn">
-        <p>[]</p>
-        <svg id="linechartA"></svg>
-        </div>
-    </div>
-
-    <div class="row">
         <div class="rightcolumn">
         <div>
             <p>Categories</p>
@@ -70,6 +60,11 @@
             <svg id="barchartB"></svg>
         </div>
         </div>
+    </div>
+
+    <div class="fullcolumn">
+        <p>Filtered Data</p>
+        <svg id="barchartC"></svg>
     </div>
 
     <br></br>
