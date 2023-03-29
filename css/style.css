@@ -90,23 +90,44 @@ li {
 /* Left column */
 .leftcolumn {   
   float: left;
-  width: 33%;
+  width: 49%;
+  background-color: #fff;
+  box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.5);
+  margin-top: 10px;
+  margin-bottom: 10px;
+  margin-right: 10px;
+  padding: 5px;
 }
 
 /* Middle column */
-.middlecolumn {
+.fullcolumn {
   float: left;
-  width: 33%;
-  background-color: #f1f1f1;
+  width: 99%;
+  /* background-color: #f1f1f1; */
   /* padding-left: 5px; */
+  box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.5);
+  margin-top: 10px;
+  margin-bottom: 10px;
+  margin-right: 10px;
+  padding: 5px;
+  background-color: #fff;
 }
 
 /* Right column */
 .rightcolumn {
   float: left;
-  width: 33%;
-  background-color: #f1f1f1;
+  width: 49%;
+  /* background-color: #f1f1f1; */
   /*padding-left: 5px;*/
+  background-color: #fff;
+  box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.5);
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding: 5px;
+}
+
+.row {
+  display: flex;
 }
 
 body {
@@ -114,4 +135,25 @@ body {
   font-size: 20px;
   padding: 10px;
   background: #f1f1f1;
+}
+
+.legend {
+  background-color: #fff;
+  margin-left: 10px;
+  height: 500px;
+  box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.5)
+}
+
+.map {
+  box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.5)
+}
+
+.bar:hover {
+  stroke: gold;
+  stroke-width: 3px;
+}
+
+.bar.active {
+  stroke: gold;
+  stroke-width: 3px;
 }

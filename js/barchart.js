@@ -5,13 +5,13 @@ class Barchart {
      * @param {Object}
      * @param {Array}
      */
-    constructor(_config, _data, _map) {
+    constructor(_config, _data, _map, _width) {
       // Configuration object with defaults
       this.config = {
         parentElement: _config.parentElement,
-        containerWidth: _config.containerWidth || 500,
+        containerWidth: _config.containerWidth || _width,
         containerHeight: _config.containerHeight || 500,
-        margin: _config.margin || {top: 10, right: 20, bottom: 40, left: 50},
+        margin: _config.margin || {top: 25, right: 20, bottom: 40, left: 50},
         reverseOrder: _config.reverseOrder || false,
         tooltipPadding: _config.tooltipPadding || 15,
         xAxisTitle: _config.xAxisTitle || 'NaN',
@@ -44,7 +44,24 @@ class Barchart {
   
       vis.xAxis = d3.axisBottom(vis.xScale)
           .ticks(data)
-          .tickSizeOuter(0);
+          .tickSizeOuter(0)
+          .tickFormat(function(d){
+            if(vis.config.xAxisTitle === "Flitered Data" && vis.num_map.length < 120) {
+              return d.substring(3,5)
+            }
+            else if(vis.config.xAxisTitle === "Flitered Data") {
+              return "";
+            }
+            else if(vis.config.xAxisTitle === "Time" && selectedOption === "month") {
+              let mon = d === "01" ? "January" : d === "02" ? "Feburary" : d === "03" ? "March" : d === "04" ? "April" : 
+                        d === "05" ? "May" : d === "06" ? "June" : d === "07" ? "July" : d === "08" ? "August" :
+                        d === "09" ? "September" : d === "10" ? "October" : d === "11" ? "November" : "December";
+              return mon;
+            }
+            else {
+              return d;
+            }
+          });
   
       vis.yAxis = d3.axisLeft(vis.yScale)
           .ticks(5)
@@ -73,7 +90,7 @@ class Barchart {
       vis.chart.append('text')
           .attr('class', 'axis-title')
           .attr('x', -10)
-          .attr('y', -10)
+          .attr('y', -20)
           .attr('dy', '.71em')
           .text(vis.config.yAxisTitle);
   
@@ -84,6 +101,10 @@ class Barchart {
       .attr('dy', '.71em')
       .style('text-anchor', 'end')
       //.text(vis.config.xAxisTitle);
+
+      // Color scale for Star Type
+      vis.colorScale = d3.scaleOrdinal().range(d3.schemeSet3)
+      .domain(["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"]);
     }
   
     /**
@@ -109,6 +130,8 @@ class Barchart {
       // Specificy accessor functions
       vis.xValue = d => d.key;
       vis.yValue = d => d.count;
+
+      vis.colorValue = d => d.key.substring(0,2);
   
       // Set the scale input domains
       vis.xScale.domain(vis.aggregatedData.map(vis.xValue));
@@ -122,33 +145,37 @@ class Barchart {
      */
     renderVis() {
       let vis = this;
+      // var colorScale = vis._width > 800 ?  d => vis.colorScale(vis.colorValue(d)) : "#023020";
+      var colorScale = vis.config.xAxisTitle == "Time" && selectedOption == "month" ? d => vis.colorScale(vis.colorValue(d)) : 
+                      vis.config.xAxisTitle == "Flitered Data" ? d => vis.colorScale(vis.colorValue(d)) : "#023020";
 
-          // create tooltip element  
-          const tooltip = d3.select("body")
-          .append("div")
-          .style("position", "absolute")
-          .style("z-index", "10")
-          .style("visibility", "hidden")
-          .style("padding", "2px 8px")
-          .style("background", "#fff")
-          .style("border", "1px solid #ddd")
-          .style("width", "100px")
-          .style("box-shadow", "2px 2px 3px 0px rgb(92 92 92 / 0.5)")
-          .style("font-size", "12px")
-          .style("font-weight", "600");
-        
+        // create tooltip element  
+        const tooltip = d3.select("body")
+        .append("div")
+        .style("position", "absolute")
+        .style("z-index", "10")
+        .style("visibility", "hidden")
+        .style("padding", "2px 8px")
+        .style("background", "#fff")
+        .style("border", "1px solid #ddd")
+        .style("width", "100px")
+        .style("box-shadow", "2px 2px 3px 0px rgb(92 92 92 / 0.5)")
+        .style("font-size", "12px")
+        .style("font-weight", "600");
+      
       // Add rectangles
-      const bars = vis.chart.selectAll('.bar')
+      vis.bars = vis.chart.selectAll('.bar')
           .data(vis.aggregatedData, vis.xValue)
         .join('rect')
-          .attr('class', 'bar')
+          .attr('class', d => filter.find(e => e === d.key) && selectedOption == "month" ? 'bar active' : "bar")
           .attr('x', d => vis.xScale(vis.xValue(d)))
           .attr('width', vis.xScale.bandwidth())
           .attr('height', d => vis.height - vis.yScale(vis.yValue(d)))
           .attr('y', d => vis.yScale(vis.yValue(d)))
-          .attr('fill', '#023020')
+          // .attr('fill', '#023020')
+          .style("fill", colorScale)
   
-      bars
+      vis.bars
         .on('mouseover', (event,d) => {
           // d3.select('#bartooltip')
           //   .style('display', 'block')
@@ -173,6 +200,25 @@ class Barchart {
         // .on('mouseleave', () => {
         //   d3.select('#bartooltip').style('display', 'none');
         // });
+
+        vis.bars.on('click', function(event, d) {
+          // vis.bars.remove();
+          if(vis.config.xAxisTitle == "Time" && selectedOption == "month") {
+            tooltip.html(``).style("visibility", "hidden");
+            var isActive = false
+            isActive = filter.find(e => e === d.key) // Check month is in filter
+            if (isActive) {
+              d3.select(this).attr("class", "bar");
+              // Remove from filter
+              filter = filter.filter(f => f !== isActive); // Remove filter
+            } else {
+              d3.select(this).attr("class", "bar active");
+              // Add to filter
+              filter.push(d.key)
+            }
+            filterData(); // Call global function to update scatter plot
+          }
+        });
 
       // Update axes
       vis.xAxisG.call(vis.xAxis);

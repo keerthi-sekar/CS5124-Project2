@@ -1,6 +1,7 @@
 
-let data, barchartA, barchartB, linechartA, leafletMap;
-
+let data, barchartA, barchartB, barchartC, linechartA, leafletMap, dayRollupG;
+let selectedOption = "month"
+let filter = [];
 processedData = []
 requestedDates = []
 
@@ -77,35 +78,31 @@ d3.tsv('data/Cincy311_2022_final.tsv')
     zipcode_rollup = d3.rollups(requestedDates, v => v.length, d => d.Zipcode);
     agency_rollup = d3.rollups(requestedDates, v => v.length, d => d.Agency);
 
-    console.log(requested_fulldate);
-
     // Initialize chart and then show it
     leafletMap = new LeafletMap({ parentElement: '#my-map'}, processedData);
 
+    var window_width = window.innerWidth;
     barchartA = new Barchart({
       parentElement: '#barchartA',
       xAxisTitle: 'Time'
-      }, data, requested_month);
+      }, data, requested_month, window_width / 2 - 50);
     
     barchartA.updateVis();
 
     barchartB = new Barchart({
       parentElement: '#barchartB',
       xAxisTitle: 'Service Code'
-      }, data, service_code_group);
+      }, data, service_code_group, window_width / 2 - 50);
     
     barchartB.updateVis();
 
-    requested_fulldate.sort(function(a,b){
-      // Turn your strings into dates, and then subtract them
-      // to get a value that is either negative, positive, or zero.
-      return new Date(b[0]) - new Date(a[0]);
-    });
-    console.log(requested_fulldate);
-    linechartA = new LineChart({
-      parentElement: '#linechartA'
-    }, requested_fulldate)
-    linechartA.updateVis();
+
+    dayRollupG = d3.rollups(processedData, v => v.length, d => d.REQUESTED_DATETIME.substring(5,10));
+    barchartC = new Barchart({
+      parentElement: '#barchartC',
+      xAxisTitle: 'Flitered Data'
+    }, processedData, dayRollupG, window_width - 50);
+    barchartC.updateVis();
  
   })
   .catch(error => console.error(error));
@@ -135,7 +132,7 @@ d3.tsv('data/Cincy311_2022_final.tsv')
 
   d3.select("#timeGraph").on("change", function(d) {
     // recover the option that has been chosen
-    var selectedOption = d3.select(this).property("value")
+    selectedOption = d3.select(this).property("value")
     
     if(selectedOption == 'month')
     {
@@ -160,7 +157,39 @@ function aerialClick(cb) {
 }
 
 function colorChange() {
-document.getElementById("legend").innerHTML = ''; 
-var val = document.getElementById("colorBy").value;
-leafletMap.updateColor(val)
+  document.getElementById("legend").innerHTML = ''; 
+  var val = document.getElementById("colorBy").value;
+  leafletMap.updateColor(val)
+}
+
+function filterData() {
+  if (filter.length == 0) {
+    // Reset Data to original
+    barchartC.num_map = dayRollupG;
+    leafletMap.data = processedData;
+  } else {
+    // Set Data to only contain what is in filter
+    filter.sort();
+    var tempData = [];
+    filter.forEach(e => {
+      var tempData2 = processedData.filter(d => e === d.REQUESTED_DATETIME.substring(5,7));
+      tempData2.sort(function(a,b){
+        // Turn your strings into dates, and then subtract them
+        // to get a value that is either negative, positive, or zero.
+        return new Date(a.REQUESTED_DATE) - new Date(b.REQUESTED_DATE);
+      });
+      tempData = tempData.concat(tempData2)
+    });
+
+    leafletMap.data = tempData;
+    leafletMap.Dots.remove();
+
+    var dayRollup = d3.rollups(tempData, v => v.length, d => d.REQUESTED_DATETIME.substring(5,10));
+    barchartC.num_map = dayRollup;
+    barchartC.bars.remove();
+  }
+  // Update Chart
+  barchartC.updateVis();
+
+  leafletMap.renderVis();
 }
