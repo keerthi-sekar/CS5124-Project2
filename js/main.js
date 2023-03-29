@@ -121,27 +121,27 @@ d3.tsv('data/Cincy311_2022_final.tsv')
     if(selectedOption == 'sc')
     {
       barchartB.num_map = service_code_group;
-      barchartB.xAxisTitle = 'Service Code';
+      barchartB.config.xAxisTitle = 'Service Code';
     }
     else if(selectedOption == 'agency')
     {
       barchartB.num_map = agency_rollup;
-      barchartB.xAxisTitle = 'Agency';
+      barchartB.config.xAxisTitle = 'Agency';
     }
     else if(selectedOption == 'rtime')
     {
       barchartB.num_map = response_time_rollup;
-      barchartB.xAxisTitle = 'Difference in Days';
+      barchartB.config.xAxisTitle = 'Difference in Days';
     }
     else if(selectedOption == 'day')
     {
       barchartB.num_map = dayOfWeek_rollup;
-      barchartB.xAxisTitle = 'Days';
+      barchartB.config.xAxisTitle = 'Day of the week';
     }
     else if(selectedOption == 'zipcode')
     {
       barchartB.num_map = zipcode_rollup;
-      barchartB.xAxisTitle = 'Zipcode';
+      barchartB.config.xAxisTitle = 'Zipcode';
     }
 
     barchartB.updateVis();
