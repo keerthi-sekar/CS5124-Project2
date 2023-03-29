@@ -1,4 +1,3 @@
-
 let data, barchartA, barchartB, barchartC, linechartA, leafletMap, dayRollupG;
 let selectedOption = "month"
 let filter = [];
@@ -26,19 +25,28 @@ d3.tsv('data/Cincy311_2022_final.tsv')
       d.REQUESTED_DATE = d.REQUESTED_DATE;
       d.UPDATED_DATE = d.UPDATED_DATE;
       d.LAST_TABLE_UPDATE = d.LAST_TABLE_UPDATE;
-      
-      
+     
+     
       // Filter data by existing lat/long and exp/req daterime fields, year 2022, and service codes BLD-RES, RCYCLNG, PTHOLE, SIDWLKH, TIRES
       var year = d.REQUESTED_DATETIME.substring(0,4);
-      if(d.LATITUDE && d.LONGITUDE && d.SERVICE_REQUEST_ID && 
+      if(d.LATITUDE && d.LONGITUDE && d.SERVICE_REQUEST_ID &&
         year == '2022' && d.EXPECTED_DATETIME && d.REQUESTED_DATETIME &&
-        (d.SERVICE_CODE == '"BLD-RES"' || d.SERVICE_CODE == '"RCYCLNG"' || 
+        (d.SERVICE_CODE == '"BLD-RES"' || d.SERVICE_CODE == '"RCYCLNG"' ||
         d.SERVICE_CODE == '"PTHOLE"' || d.SERVICE_CODE == '"SIDWLKH"' || d.SERVICE_CODE == '"TIRES"')) {
         processedData.push(d)
 
         let parsed1 = d.SERVICE_CODE.replace('"/','');
         let parsed2 = parsed1.replace('\"','');
         let parsed_finalServiceCode = parsed2.replace('"', '');
+
+        const date1 = new Date(d.REQUESTED_DATETIME)
+        const date2 = new Date(d.UPDATED_DATETIME)
+        // To calculate the time difference of two dates
+        var Difference_In_Time = date2.getTime() - date1.getTime();
+        // To calculate the no. of days between two dates
+        var Difference_In_Days = Difference_In_Time / (1000 * 3600 * 24);
+        // console.log(Difference_In_Days)
+        d.RESPONSE_TIME = Difference_In_Days
 
         var req_date = {
           'Service_ID': d.SERVICE_REQUEST_ID,
@@ -52,23 +60,15 @@ d3.tsv('data/Cincy311_2022_final.tsv')
           'RequestedDay': d.REQUESTED_DATETIME.substring(8,10),
           'UpdatedDay': d.UPDATED_DATETIME.substring(8,10),
           'Zipcode': d.ZIPCODE,
-          'Agency': d.AGENCY_RESPONSIBLE
+          'Agency': d.AGENCY_RESPONSIBLE,
+          'ReponseTime': d.RESPONSE_TIME
         }
         requestedDates.push(req_date);
-
-        const date1 = new Date(d.REQUESTED_DATETIME)
-        const date2 = new Date(d.UPDATED_DATETIME)
-        // To calculate the time difference of two dates
-        var Difference_In_Time = date2.getTime() - date1.getTime();
-        // To calculate the no. of days between two dates
-        var Difference_In_Days = Difference_In_Time / (1000 * 3600 * 24);
-        // console.log(Difference_In_Days)
-        d.RESPONSE_TIME = Difference_In_Days
       }
 
     });
 
-    
+   
     console.log('req-date', data);
     requested_fulldate = d3.rollups(requestedDates, v => v.length, d => d.DATETIME);
     requested_month = d3.rollups(requestedDates, v => v.length, d => d.RequestedMonth);
@@ -77,6 +77,7 @@ d3.tsv('data/Cincy311_2022_final.tsv')
     status_rollup = d3.rollups(requestedDates, v => v.length, d => d.Status);
     zipcode_rollup = d3.rollups(requestedDates, v => v.length, d => d.Zipcode);
     agency_rollup = d3.rollups(requestedDates, v => v.length, d => d.Agency);
+    response_time_rollup = d3.rollups(requestedDates, v => v.length, d => d.ReponseTime);
 
     // Initialize chart and then show it
     leafletMap = new LeafletMap({ parentElement: '#my-map'}, processedData);
@@ -86,14 +87,14 @@ d3.tsv('data/Cincy311_2022_final.tsv')
       parentElement: '#barchartA',
       xAxisTitle: 'Time'
       }, data, requested_month, window_width / 2 - 50);
-    
+   
     barchartA.updateVis();
 
     barchartB = new Barchart({
       parentElement: '#barchartB',
       xAxisTitle: 'Service Code'
       }, data, service_code_group, window_width / 2 - 50);
-    
+   
     barchartB.updateVis();
 
 
@@ -110,7 +111,7 @@ d3.tsv('data/Cincy311_2022_final.tsv')
   d3.select("#selectGraph").on("change", function(d) {
     // recover the option that has been chosen
     var selectedOption = d3.select(this).property("value")
-    
+   
     if(selectedOption == 'sc')
     {
       barchartB.num_map = service_code_group;
@@ -121,31 +122,19 @@ d3.tsv('data/Cincy311_2022_final.tsv')
       barchartB.num_map = agency_rollup;
       barchartB.xAxisTitle = 'Agency';
     }
-    else
+    else if(selectedOption == 'rtime')
     {
-      barchartB.num_map = status_rollup;
-      barchartB.xAxisTitle = 'Status';
+      barchartB.num_map = response_time_rollup;
+      barchartB.xAxisTitle = 'Difference in Days';
+    }
+    else if(selectedOption == 'day')
+    {
+      barchartB.num_map = requested_day;
+      barchartB.xAxisTitle = 'Days';
     }
 
     barchartB.updateVis();
   })
-
-  d3.select("#timeGraph").on("change", function(d) {
-    // recover the option that has been chosen
-    selectedOption = d3.select(this).property("value")
-    
-    if(selectedOption == 'month')
-    {
-      barchartA.num_map = requested_month;
-      
-    }
-    else
-    {
-      barchartA.num_map = requested_day;
-    }
-
-    barchartA.updateVis();
-})
 
 function aerialClick(cb) {
   if(cb.checked) {
@@ -157,7 +146,7 @@ function aerialClick(cb) {
 }
 
 function colorChange() {
-  document.getElementById("legend").innerHTML = ''; 
+  document.getElementById("legend").innerHTML = '';
   var val = document.getElementById("colorBy").value;
   leafletMap.updateColor(val)
 }
