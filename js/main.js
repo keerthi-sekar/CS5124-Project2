@@ -138,6 +138,11 @@ d3.tsv('data/Cincy311_2022_final.tsv')
       barchartB.num_map = dayOfWeek_rollup;
       barchartB.xAxisTitle = 'Days';
     }
+    else if(selectedOption == 'zipcode')
+    {
+      barchartB.num_map = zipcode_rollup;
+      barchartB.xAxisTitle = 'Zipcode';
+    }
 
     barchartB.updateVis();
   })
