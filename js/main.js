@@ -48,20 +48,23 @@ d3.tsv('data/Cincy311_2022_final.tsv')
         // console.log(Difference_In_Days)
         d.RESPONSE_TIME = Difference_In_Days
 
+        let dayOfWeek = date1.getDay();
+
         var req_date = {
           'Service_ID': d.SERVICE_REQUEST_ID,
           'Status': d.STATUS,
           'ServiceCode': parsed_finalServiceCode,
           'DATETIME': d.REQUESTED_DATETIME,
           'RequestedYear': d.REQUESTED_DATETIME.substring(0,4),
-          'UpdatedYear': d.UPDATED_DATETIME.substring(0,4),
+          //'UpdatedYear': d.UPDATED_DATETIME.substring(0,4),
           'RequestedMonth': d.REQUESTED_DATETIME.substring(5,7),
-          'UpdatedMonth': d.UPDATED_DATETIME.substring(5,7),
+          //'UpdatedMonth': d.UPDATED_DATETIME.substring(5,7),
           'RequestedDay': d.REQUESTED_DATETIME.substring(8,10),
-          'UpdatedDay': d.UPDATED_DATETIME.substring(8,10),
+          //'UpdatedDay': d.UPDATED_DATETIME.substring(8,10),
           'Zipcode': d.ZIPCODE,
           'Agency': d.AGENCY_RESPONSIBLE,
-          'ReponseTime': d.RESPONSE_TIME
+          'ReponseTime': d.RESPONSE_TIME,
+          'DayOfWeek': dayOfWeek+1
         }
         requestedDates.push(req_date);
       }
@@ -69,7 +72,10 @@ d3.tsv('data/Cincy311_2022_final.tsv')
     });
 
    
-    console.log('req-date', data);
+    console.log('req-date', requestedDates);
+
+    requestedDates = requestedDates.sort(function (a,b) {return d3.ascending(a.DayOfWeek, b.DayOfWeek);});
+
     requested_fulldate = d3.rollups(requestedDates, v => v.length, d => d.DATETIME);
     requested_month = d3.rollups(requestedDates, v => v.length, d => d.RequestedMonth);
     requested_day = d3.rollups(requestedDates, v => v.length, d => d.RequestedDay);
@@ -78,7 +84,7 @@ d3.tsv('data/Cincy311_2022_final.tsv')
     zipcode_rollup = d3.rollups(requestedDates, v => v.length, d => d.Zipcode);
     agency_rollup = d3.rollups(requestedDates, v => v.length, d => d.Agency);
     response_time_rollup = d3.rollups(requestedDates, v => v.length, d => d.ReponseTime);
-
+    dayOfWeek_rollup = d3.rollups(requestedDates, v => v.length, d => d.DayOfWeek);
     // Initialize chart and then show it
     leafletMap = new LeafletMap({ parentElement: '#my-map'}, processedData);
 
@@ -129,7 +135,7 @@ d3.tsv('data/Cincy311_2022_final.tsv')
     }
     else if(selectedOption == 'day')
     {
-      barchartB.num_map = requested_day;
+      barchartB.num_map = dayOfWeek_rollup;
       barchartB.xAxisTitle = 'Days';
     }
 
