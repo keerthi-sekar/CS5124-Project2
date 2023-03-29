@@ -116,7 +116,7 @@ class Barchart {
       if (vis.config.reverseOrder) {
         vis.data.reverse();
       }
-  
+      
       // Prepare data: count number of trails in each difficulty category
       // i.e. [{ key: 'easy', count: 10 }, {key: 'intermediate', ...
       //const aggregatedDataMap = d3.rollups(vis.data, v => v.length, d => d.sy_snum);
@@ -185,7 +185,7 @@ class Barchart {
             // <div class="tooltip-label">${d.key}</div>
             //   <div class="tooltip-label">Calls: ${d.count}</div>
           //   `);
-          tooltip.html(`<div class="tooltip-title">${d.key}</div>
+          tooltip.html(`<div class="tooltip-title">${vis.config.xAxisTitle}: ${d.key}</div>
           <div class="tooltip-label">Calls: ${d.count}</div>`).style("visibility", "visible");
         })
         .on("mousemove", function(){
