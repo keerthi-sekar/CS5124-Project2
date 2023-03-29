@@ -80,6 +80,7 @@ d3.tsv('data/Cincy311_2022_final.tsv')
 
     // Initialize chart and then show it
     leafletMap = new LeafletMap({ parentElement: '#my-map'}, processedData);
+
     var window_width = window.innerWidth;
     barchartA = new Barchart({
       parentElement: '#barchartA',
@@ -165,6 +166,7 @@ function filterData() {
   if (filter.length == 0) {
     // Reset Data to original
     barchartC.num_map = dayRollupG;
+    leafletMap.data = processedData;
   } else {
     // Set Data to only contain what is in filter
     filter.sort();
@@ -179,10 +181,15 @@ function filterData() {
       tempData = tempData.concat(tempData2)
     });
 
+    leafletMap.data = tempData;
+    leafletMap.Dots.remove();
+
     var dayRollup = d3.rollups(tempData, v => v.length, d => d.REQUESTED_DATETIME.substring(5,10));
     barchartC.num_map = dayRollup;
     barchartC.bars.remove();
   }
   // Update Chart
   barchartC.updateVis();
+
+  leafletMap.renderVis();
 }

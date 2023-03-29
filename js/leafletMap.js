@@ -50,141 +50,63 @@ class LeafletMap {
 
     vis.theMap.setView([vis.data[0].LATITUDE, vis.data[0].LONGITUDE], 11)
 
-     //initialize svg for d3 to add to map
-     L.svg({clickable:true}).addTo(vis.theMap)// we have to make the svg layer clickable
-     vis.overlay = d3.select(vis.theMap.getPanes().overlayPane)
-     vis.svg = vis.overlay.select('svg').attr("pointer-events", "auto")
+    //initialize svg for d3 to add to map
+    L.svg({clickable:true}).addTo(vis.theMap)// we have to make the svg layer clickable
+    vis.overlay = d3.select(vis.theMap.getPanes().overlayPane)
+    vis.svg = vis.overlay.select('svg').attr("pointer-events", "auto")
 
-     vis.colorScale = d3.scaleOrdinal().range(d3.schemeCategory10)
-     .domain(['"BLD-RES"','"RCYCLNG"', '"PTHOLE"', '"SIDWLKH"', '"TIRES"']);
-
-      //these are the city locations, displayed as a set of dots 
-      vis.Dots = vis.svg.selectAll('circle')
-      .data(vis.data) 
-      .join('circle')
-          .attr("fill", d => vis.colorScale(d.SERVICE_CODE)) 
-          .attr("stroke", "black")
-          //Leaflet has to take control of projecting points. Here we are feeding the latitude and longitude coordinates to
-          //leaflet so that it can project them on the coordinates of the view. Notice, we have to reverse lat and lon.
-          //Finally, the returned conversion produces an x and y point. We have to select the the desired one using .x or .y
-          .attr("cx", d => vis.theMap.latLngToLayerPoint([d.LATITUDE,d.LONGITUDE]).x)
-          .attr("cy", d => vis.theMap.latLngToLayerPoint([d.LATITUDE,d.LONGITUDE]).y) 
-          .attr("r", 3)
-          .on('mouseover', function(event,d) { //function to add mouseover event
-            d3.select(this).transition() //D3 selects the object we have moused over in order to perform operations on it
-              .duration('150') //how long we are transitioning between the two states (works like keyframes)
-              .attr("stroke", "gold")
-              .attr("stroke-width", "3px")
-              .attr('r', 8) //change radius
-
-            //create a tool tip
-            d3.select('#tooltip')
-                .style('opacity', 1)
-                .style('z-index', 1000000)
-                  // Format number with million and thousand separator
-                .html(`<div class="tooltip-label">Type of Call: ${d.SERVICE_NAME.substring(1,d.SERVICE_NAME.length - 1)}</div>
-                       <div class="tooltip-label">Description: ${d.DESCRIPTION.substring(1,d.DESCRIPTION.length - 1)}</div>
-                       <div class="tooltip-label">Date of Call: ${d.REQUESTED_DATETIME}</div>
-                       <div class="tooltip-label">Date Updated: ${d.UPDATED_DATETIME}</div>
-                       <div class="tooltip-label">Agency Responsible: ${d.AGENCY_RESPONSIBLE}</div>`);
-          })
-          .on('mousemove', (event) => {
-            //position the tooltip
-            d3.select('#tooltip')
-             .style('left', (event.pageX + 10) + 'px')   
-              .style('top', (event.pageY + 10) + 'px');
-           })  
-          .on('mouseleave', function() { //reverse the action based on when we mouse off the the circle
-            d3.select(this).transition()
-              .duration('150')
-              .attr("stroke", "black")
-              .attr("stroke-width", "1px")
-              .attr('r', 3)
-            d3.select('#tooltip').style('opacity', 0);//turn off the tooltip
-          });;
-
-      var legendData = [{name: 'Building, residential', SERVICE_CODE: '"BLD-RES"'},{name: 'Recycling', SERVICE_CODE: '"RCYCLNG"'}, 
+    // Call type
+    vis.callType = ['"BLD-RES"','"RCYCLNG"', '"PTHOLE"', '"SIDWLKH"', '"TIRES"']
+    vis.callTypeData = [{name: 'Building, residential', SERVICE_CODE: '"BLD-RES"'},{name: 'Recycling', SERVICE_CODE: '"RCYCLNG"'}, 
                         {name: 'Pothole, repair', SERVICE_CODE:'"PTHOLE"'}, {name: 'Sidewalk, repair haz', SERVICE_CODE: '"SIDWLKH"'}, 
                         {name: 'Tires', SERVICE_CODE:'"TIRES"'}]
-      //Initialize legend
-      vis.legendItemSize = 12;
-      vis.legendSpacing = 8;
-      vis.xOffset = 50;
-      vis.yOffset = 50;
-      vis.legend = d3
-        .select('#legend')
-        .append('svg')
-              .selectAll('.legendItem')
-              .data(legendData);
-        
-      //Create legend items
-      vis.legend
-        .enter()
-        .append('rect')
-        .attr('class', 'legendItem')
-        .attr('width', vis.legendItemSize)
-        .attr('height', vis.legendItemSize)
-        .style('fill', d => vis.colorScale(d.SERVICE_CODE))
-        .attr('transform',
-                  (d, i) => {
-                      var x = vis.xOffset;
-                      var y = vis.yOffset + (vis.legendItemSize + vis.legendSpacing) * i;
-                      return `translate(${x}, ${y})`;
-                  });
+    // Agency Responsible
+    vis.agency = ['Cinc Building Dept', 'Public Services', "City Manager's Office", 'Dept of Trans and Eng']
+    vis.agencyData = [{name: 'Cinc Building Dept', SERVICE_CODE: 'Cinc Building Dept'},{name: 'Public Services', SERVICE_CODE: 'Public Services'}, 
+                      {name: "City Manager's Office", SERVICE_CODE:"City Manager's Office"}, {name: 'Dept of Trans and Eng', SERVICE_CODE: 'Dept of Trans and Eng'}]
+    // Date
+    vis.date = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']
+    vis.dateData = [{name: 'January', SERVICE_CODE: '01'},{name: 'February', SERVICE_CODE: '02'},{name: 'March', SERVICE_CODE: '03'},
+                    {name: 'April', SERVICE_CODE: '04'},{name: 'May', SERVICE_CODE: '05'},{name: 'June', SERVICE_CODE: '06'},
+                    {name: 'July', SERVICE_CODE: '07'},{name: 'August', SERVICE_CODE: '08'},{name: 'September', SERVICE_CODE: '09'},
+                    {name: 'October', SERVICE_CODE: '10'},{name: 'November', SERVICE_CODE: '11'},{name: 'December', SERVICE_CODE: '12'}]
+    // Response
+    vis.res = ['0', '10', '20', '30', '40', '50']
+    vis.resData = [{name: '0-9 days', SERVICE_CODE: '0'},{name: '10-19 days', SERVICE_CODE: '10'},{name: "20-29 days", SERVICE_CODE:"20"}, 
+                  {name: '30-39 days', SERVICE_CODE: '30'}, {name: '40-49 days', SERVICE_CODE: '40'}, {name: '50-59 days', SERVICE_CODE: '50'}]
 
-      //Create legend labels
-      vis.legend
-        .enter()
-        .append('text')
-        .attr('x', vis.xOffset + vis.legendItemSize + 5)
-        .attr('y', (d, i) => vis.yOffset + (vis.legendItemSize + vis.legendSpacing) * i + 12)
-        .text(d => d.name);		
+    //Initialize legend
+    vis.legendItemSize = 12;
+    vis.legendSpacing = 8;
+    vis.xOffset = 50;
+    vis.yOffset = 50;
 
-      //handler here for updating the map, as you zoom in and out           
-      vis.theMap.on("zoomend", function(){
-        vis.updateVis();
-      });
+    vis.renderVis();
 
+    //handler here for updating the map, as you zoom in and out           
+    vis.theMap.on("zoomend", function(){
+      vis.zoom();
+    });
 
   }
 
-  updateVis() {
+  zoom() {
     let vis = this;
 
     //redraw based on new zoom- need to recalculate on-screen position
     vis.Dots
       .attr("cx", d => vis.theMap.latLngToLayerPoint([d.LATITUDE,d.LONGITUDE]).x)
       .attr("cy", d => vis.theMap.latLngToLayerPoint([d.LATITUDE,d.LONGITUDE]).y)
-      .attr("r", 3) ;
+      .attr("r", 3);
 
   }
 
   updateColor(colorBy) {
     let vis = this;
 
-    // Call type
-    var callType = ['"BLD-RES"','"RCYCLNG"', '"PTHOLE"', '"SIDWLKH"', '"TIRES"']
-    var callTypeData = [{name: 'Building, residential', SERVICE_CODE: '"BLD-RES"'},{name: 'Recycling', SERVICE_CODE: '"RCYCLNG"'}, 
-                        {name: 'Pothole, repair', SERVICE_CODE:'"PTHOLE"'}, {name: 'Sidewalk, repair haz', SERVICE_CODE: '"SIDWLKH"'}, 
-                        {name: 'Tires', SERVICE_CODE:'"TIRES"'}]
-    // Agency Responsible
-    var agency = ['Cinc Building Dept', 'Public Services', "City Manager's Office", 'Dept of Trans and Eng']
-    var agencyData = [{name: 'Cinc Building Dept', SERVICE_CODE: 'Cinc Building Dept'},{name: 'Public Services', SERVICE_CODE: 'Public Services'}, 
-                      {name: "City Manager's Office", SERVICE_CODE:"City Manager's Office"}, {name: 'Dept of Trans and Eng', SERVICE_CODE: 'Dept of Trans and Eng'}]
-    // Date
-    var date = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']
-    var dateData = [{name: 'January', SERVICE_CODE: '01'},{name: 'February', SERVICE_CODE: '02'},{name: 'March', SERVICE_CODE: '03'},
-                    {name: 'April', SERVICE_CODE: '04'},{name: 'May', SERVICE_CODE: '05'},{name: 'June', SERVICE_CODE: '06'},
-                    {name: 'July', SERVICE_CODE: '07'},{name: 'August', SERVICE_CODE: '08'},{name: 'September', SERVICE_CODE: '09'},
-                    {name: 'October', SERVICE_CODE: '10'},{name: 'November', SERVICE_CODE: '11'},{name: 'December', SERVICE_CODE: '12'}]
-    // Response
-    var res = ['0', '10', '20', '30', '40', '50']
-    var resData = [{name: '0-9 days', SERVICE_CODE: '0'},{name: '10-19 days', SERVICE_CODE: '10'},{name: "20-29 days", SERVICE_CODE:"20"}, 
-                   {name: '30-39 days', SERVICE_CODE: '30'}, {name: '40-49 days', SERVICE_CODE: '40'}, {name: '50-59 days', SERVICE_CODE: '50'}]
-
     // Use logic to get right array
-    var domainArr = colorBy === "Call" ? callType : colorBy === "Agency" ? agency : colorBy === "Date" ? date : res;
-    var legendData = colorBy === "Call" ? callTypeData : colorBy === "Agency" ? agencyData : colorBy === "Date" ? dateData : resData;
+    var domainArr = colorBy === "Call" ? vis.callType : colorBy === "Agency" ? vis.agency : colorBy === "Date" ? vis.date : vis.res;
+    var legendData = colorBy === "Call" ? vis.callTypeData : colorBy === "Agency" ? vis.agencyData : colorBy === "Date" ? vis.dateData : vis.resData;
 
     vis.colorScale = d3.scaleOrdinal().range(d3.schemeCategory10)
     .domain(domainArr);
@@ -244,6 +166,49 @@ class LeafletMap {
 
   renderVis() {
     let vis = this;
- 
+
+    //these are the city locations, displayed as a set of dots 
+    vis.Dots = vis.svg.selectAll('circle')
+    .data(vis.data) 
+    .join('circle')
+        .attr("cx", d => vis.theMap.latLngToLayerPoint([d.LATITUDE,d.LONGITUDE]).x)
+        .attr("cy", d => vis.theMap.latLngToLayerPoint([d.LATITUDE,d.LONGITUDE]).y) 
+        .attr("r", 3)
+        .on('mouseover', function(event,d) { //function to add mouseover event
+          d3.select(this).transition() //D3 selects the object we have moused over in order to perform operations on it
+            .duration('150') //how long we are transitioning between the two states (works like keyframes)
+            .attr("stroke", "gold")
+            .attr("stroke-width", "3px")
+            .attr('r', 8) //change radius
+
+          //create a tool tip
+          d3.select('#tooltip')
+              .style('opacity', 1)
+              .style('z-index', 1000000)
+                // Format number with million and thousand separator
+              .html(`<div class="tooltip-label">Type of Call: ${d.SERVICE_NAME.substring(1,d.SERVICE_NAME.length - 1)}</div>
+                    <div class="tooltip-label">Description: ${d.DESCRIPTION.substring(1,d.DESCRIPTION.length - 1)}</div>
+                    <div class="tooltip-label">Date of Call: ${d.REQUESTED_DATETIME}</div>
+                    <div class="tooltip-label">Date Updated: ${d.UPDATED_DATETIME}</div>
+                    <div class="tooltip-label">Agency Responsible: ${d.AGENCY_RESPONSIBLE}</div>`);
+        })
+        .on('mousemove', (event) => {
+          //position the tooltip
+          d3.select('#tooltip')
+          .style('left', (event.pageX + 10) + 'px')   
+            .style('top', (event.pageY + 10) + 'px');
+        })  
+        .on('mouseleave', function() { //reverse the action based on when we mouse off the the circle
+          d3.select(this).transition()
+            .duration('150')
+            .attr("stroke", "black")
+            .attr("stroke-width", "1px")
+            .attr('r', 3)
+          d3.select('#tooltip').style('opacity', 0);//turn off the tooltip
+        });
+        
+        var val = document.getElementById("colorBy").value;
+        document.getElementById("legend").innerHTML = ''; 
+        vis.updateColor(val)
   }
 }
