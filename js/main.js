@@ -1,4 +1,3 @@
-
 let data, barchartA, barchartB, barchartC, linechartA, leafletMap, dayRollupG;
 let selectedOption = "month"
 let filter = [];
@@ -26,35 +25,19 @@ d3.tsv('data/Cincy311_2022_final.tsv')
       d.REQUESTED_DATE = d.REQUESTED_DATE;
       d.UPDATED_DATE = d.UPDATED_DATE;
       d.LAST_TABLE_UPDATE = d.LAST_TABLE_UPDATE;
-      
-      
+     
+     
       // Filter data by existing lat/long and exp/req daterime fields, year 2022, and service codes BLD-RES, RCYCLNG, PTHOLE, SIDWLKH, TIRES
       var year = d.REQUESTED_DATETIME.substring(0,4);
-      if(d.LATITUDE && d.LONGITUDE && d.SERVICE_REQUEST_ID && 
+      if(d.LATITUDE && d.LONGITUDE && d.SERVICE_REQUEST_ID &&
         year == '2022' && d.EXPECTED_DATETIME && d.REQUESTED_DATETIME &&
-        (d.SERVICE_CODE == '"BLD-RES"' || d.SERVICE_CODE == '"RCYCLNG"' || 
+        (d.SERVICE_CODE == '"BLD-RES"' || d.SERVICE_CODE == '"RCYCLNG"' ||
         d.SERVICE_CODE == '"PTHOLE"' || d.SERVICE_CODE == '"SIDWLKH"' || d.SERVICE_CODE == '"TIRES"')) {
         processedData.push(d)
 
         let parsed1 = d.SERVICE_CODE.replace('"/','');
         let parsed2 = parsed1.replace('\"','');
         let parsed_finalServiceCode = parsed2.replace('"', '');
-
-        var req_date = {
-          'Service_ID': d.SERVICE_REQUEST_ID,
-          'Status': d.STATUS,
-          'ServiceCode': parsed_finalServiceCode,
-          'DATETIME': d.REQUESTED_DATETIME,
-          'RequestedYear': d.REQUESTED_DATETIME.substring(0,4),
-          'UpdatedYear': d.UPDATED_DATETIME.substring(0,4),
-          'RequestedMonth': d.REQUESTED_DATETIME.substring(5,7),
-          'UpdatedMonth': d.UPDATED_DATETIME.substring(5,7),
-          'RequestedDay': d.REQUESTED_DATETIME.substring(8,10),
-          'UpdatedDay': d.UPDATED_DATETIME.substring(8,10),
-          'Zipcode': d.ZIPCODE,
-          'Agency': d.AGENCY_RESPONSIBLE
-        }
-        requestedDates.push(req_date);
 
         const date1 = new Date(d.REQUESTED_DATETIME)
         const date2 = new Date(d.UPDATED_DATETIME)
@@ -64,12 +47,36 @@ d3.tsv('data/Cincy311_2022_final.tsv')
         var Difference_In_Days = Difference_In_Time / (1000 * 3600 * 24);
         // console.log(Difference_In_Days)
         d.RESPONSE_TIME = Difference_In_Days
+
+        let dayOfWeek = date1.getDay();
+
+        var req_date = {
+          'Service_ID': d.SERVICE_REQUEST_ID,
+          'Status': d.STATUS,
+          'ServiceCode': parsed_finalServiceCode,
+          'DATETIME': d.REQUESTED_DATETIME,
+          'RequestedYear': d.REQUESTED_DATETIME.substring(0,4),
+          //'UpdatedYear': d.UPDATED_DATETIME.substring(0,4),
+          'RequestedMonth': d.REQUESTED_DATETIME.substring(5,7),
+          //'UpdatedMonth': d.UPDATED_DATETIME.substring(5,7),
+          'RequestedDay': d.REQUESTED_DATETIME.substring(8,10),
+          //'UpdatedDay': d.UPDATED_DATETIME.substring(8,10),
+          'Zipcode': d.ZIPCODE,
+          'Agency': d.AGENCY_RESPONSIBLE,
+          'ReponseTime': d.RESPONSE_TIME,
+          'DayOfWeek': dayOfWeek+1
+        }
+        requestedDates.push(req_date);
       }
 
     });
 
-    
-    console.log('req-date', data);
+   
+    console.log('req-date', requestedDates);
+
+    requestedDates = requestedDates.sort(function (a,b) {return d3.ascending(a.DayOfWeek, b.DayOfWeek);});
+    requestedDates = requestedDates.sort(function (a,b) {return d3.ascending(a.ReponseTime, b.ReponseTime);});
+
     requested_fulldate = d3.rollups(requestedDates, v => v.length, d => d.DATETIME);
     requested_month = d3.rollups(requestedDates, v => v.length, d => d.RequestedMonth);
     requested_day = d3.rollups(requestedDates, v => v.length, d => d.RequestedDay);
@@ -77,7 +84,8 @@ d3.tsv('data/Cincy311_2022_final.tsv')
     status_rollup = d3.rollups(requestedDates, v => v.length, d => d.Status);
     zipcode_rollup = d3.rollups(requestedDates, v => v.length, d => d.Zipcode);
     agency_rollup = d3.rollups(requestedDates, v => v.length, d => d.Agency);
-
+    response_time_rollup = d3.rollups(requestedDates, v => v.length, d => d.ReponseTime);
+    dayOfWeek_rollup = d3.rollups(requestedDates, v => v.length, d => d.DayOfWeek);
     // Initialize chart and then show it
     leafletMap = new LeafletMap({ parentElement: '#my-map'}, processedData);
 
@@ -86,14 +94,14 @@ d3.tsv('data/Cincy311_2022_final.tsv')
       parentElement: '#barchartA',
       xAxisTitle: 'Time'
       }, data, requested_month, window_width / 2 - 50);
-    
+   
     barchartA.updateVis();
 
     barchartB = new Barchart({
       parentElement: '#barchartB',
       xAxisTitle: 'Service Code'
       }, data, service_code_group, window_width / 2 - 50);
-    
+   
     barchartB.updateVis();
 
 
@@ -110,42 +118,35 @@ d3.tsv('data/Cincy311_2022_final.tsv')
   d3.select("#selectGraph").on("change", function(d) {
     // recover the option that has been chosen
     var selectedOption = d3.select(this).property("value")
-    
+   
     if(selectedOption == 'sc')
     {
       barchartB.num_map = service_code_group;
-      barchartB.xAxisTitle = 'Service Code';
+      barchartB.config.xAxisTitle = 'Service Code';
     }
     else if(selectedOption == 'agency')
     {
       barchartB.num_map = agency_rollup;
-      barchartB.xAxisTitle = 'Agency';
+      barchartB.config.xAxisTitle = 'Agency';
     }
-    else
+    else if(selectedOption == 'rtime')
     {
-      barchartB.num_map = status_rollup;
-      barchartB.xAxisTitle = 'Status';
+      barchartB.num_map = response_time_rollup;
+      barchartB.config.xAxisTitle = 'Difference in Days';
+    }
+    else if(selectedOption == 'day')
+    {
+      barchartB.num_map = dayOfWeek_rollup;
+      barchartB.config.xAxisTitle = 'Day of the week';
+    }
+    else if(selectedOption == 'zipcode')
+    {
+      barchartB.num_map = zipcode_rollup;
+      barchartB.config.xAxisTitle = 'Zipcode';
     }
 
     barchartB.updateVis();
   })
-
-  d3.select("#timeGraph").on("change", function(d) {
-    // recover the option that has been chosen
-    selectedOption = d3.select(this).property("value")
-    
-    if(selectedOption == 'month')
-    {
-      barchartA.num_map = requested_month;
-      
-    }
-    else
-    {
-      barchartA.num_map = requested_day;
-    }
-
-    barchartA.updateVis();
-})
 
 function aerialClick(cb) {
   if(cb.checked) {
@@ -157,7 +158,7 @@ function aerialClick(cb) {
 }
 
 function colorChange() {
-  document.getElementById("legend").innerHTML = ''; 
+  document.getElementById("legend").innerHTML = '';
   var val = document.getElementById("colorBy").value;
   leafletMap.updateColor(val)
 }
