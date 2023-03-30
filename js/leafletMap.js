@@ -50,6 +50,14 @@ class LeafletMap {
 
     vis.theMap.setView([vis.data[0].LATITUDE, vis.data[0].LONGITUDE], 11)
 
+    vis.theMap.selectArea.enable();
+
+    vis.theMap.on('areaselected', (e) => {
+      console.log(e.bounds.toBBoxString()); // lon, lat, lon, lat
+      latLongArea = e.bounds.toBBoxString().split(',');
+      filterData();
+    });
+
     //initialize svg for d3 to add to map
     L.svg({clickable:true}).addTo(vis.theMap)// we have to make the svg layer clickable
     vis.overlay = d3.select(vis.theMap.getPanes().overlayPane)

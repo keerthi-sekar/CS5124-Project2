@@ -1,6 +1,7 @@
 
 let data, barchartA, barchartB, barchartC, linechartA, leafletMap, dayRollupG;
 let selectedOption = "month"
+let latLongArea = [];
 let filter = [];
 processedData = []
 requestedDates = []
@@ -162,12 +163,34 @@ function colorChange() {
   leafletMap.updateColor(val)
 }
 
+function clearFilters() {
+  filter = [];
+  latLongArea = [];
+  filterData();
+}
+
 function filterData() {
-  if (filter.length == 0) {
+  if (filter.length == 0 && latLongArea.length == 0) {
+    document.getElementById("btn").disabled = true;
     // Reset Data to original
     barchartC.num_map = dayRollupG;
     leafletMap.data = processedData;
-  } else {
+  } 
+  else if(filter.length == 0) {
+    document.getElementById("btn").disabled = false;
+    let newTempData = [];
+    processedData.filter(function(d) {
+      if(d.LATITUDE <= parseFloat(latLongArea[3]) && d.LATITUDE >= parseFloat(latLongArea[1]) && 
+         d.LONGITUDE >= parseFloat(latLongArea[0]) && d.LONGITUDE <= parseFloat(latLongArea[2]))
+      {
+        newTempData.push(d);
+      }
+    });
+    barchartC.num_map = d3.rollups(newTempData, v => v.length, d => d.REQUESTED_DATETIME.substring(5,10));
+    leafletMap.data = newTempData;
+  }
+  else {
+    document.getElementById("btn").disabled = false;
     // Set Data to only contain what is in filter
     filter.sort();
     var tempData = [];
@@ -180,6 +203,19 @@ function filterData() {
       });
       tempData = tempData.concat(tempData2)
     });
+
+    console.log(latLongArea)
+    if(latLongArea.length > 0) {
+      let newTempData = [];
+      tempData.filter(function(d) {
+        if(d.LATITUDE <= parseFloat(latLongArea[3]) && d.LATITUDE >= parseFloat(latLongArea[1]) && 
+           d.LONGITUDE >= parseFloat(latLongArea[0]) && d.LONGITUDE <= parseFloat(latLongArea[2]))
+        {
+          newTempData.push(d);
+        }
+      });
+      tempData = newTempData;
+    }
 
     leafletMap.data = tempData;
     leafletMap.Dots.remove();

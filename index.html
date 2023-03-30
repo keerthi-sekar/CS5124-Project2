@@ -18,18 +18,21 @@
         <a href="https://data.cincinnati-oh.gov/Thriving-Neighborhoods/Cincinnati-311-Non-Emergency-Service-Requests/4cjh-bm8b">Data Source</a>
     </div>
     <br> </br>
-
     <div>
-        <label style="font-size: medium">Color By: </label> 
-        <select name="colorBy" id="colorBy" onchange="colorChange()">
-            <option value="Call" >Call Type</option>
-            <option value="Agency" >Public Agency</option>
-            <option value="Date" >Date</option>
-            <option value="Response" >Response Time</option>
-        </select>
-        <input type="checkbox" id="AerialView" name="AerialView" value="AerialView" onchange="aerialClick(this)">
-        <label style="font-size: medium" for="AerialView">Aerial View</label><br>
-        <br/>
+        <div style="display: flex; justify-content: space-between; margin-right: 20px; margin-bottom: 10px; width: 80%;">
+            <div>
+                <label style="font-size: medium">Color By: </label> 
+                <select name="colorBy" id="colorBy" onchange="colorChange()">
+                    <option value="Call" >Call Type</option>
+                    <option value="Agency" >Public Agency</option>
+                    <option value="Date" >Date</option>
+                    <option value="Response" >Response Time</option>
+                </select>
+                <input type="checkbox" id="AerialView" name="AerialView" value="AerialView" onchange="aerialClick(this)">
+                <label style="font-size: medium" for="AerialView">Aerial View</label>
+            </div>
+            <button class="btn" id="btn" disabled="true" onclick="clearFilters()">Clear Filters</button>
+        </div>
         <div style="display: flex; ">
             <div class="map" id="my-map"></div>
             <div class="legend" id="legend"></div>
@@ -75,6 +78,7 @@
     <script src="js/leafletMap.js"></script>
     <script src="js/barchart.js"></script>
     <script src="js/linechart.js"></script>
+    <script src="js/Map.SelectArea.min.js"></script>
 
     <div id="tooltip"></div>
 
