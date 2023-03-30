@@ -46,13 +46,13 @@ class Barchart {
           .ticks(data)
           .tickSizeOuter(0)
           .tickFormat(function(d){
-            if(vis.config.xAxisTitle === "Flitered Data" && vis.num_map.length < 120) {
+            if(vis.config.xAxisTitle === "Date" && vis.num_map.length < 120) {
               return d.substring(3,5)
             }
-            else if(vis.config.xAxisTitle === "Flitered Data") {
+            else if(vis.config.xAxisTitle === "Date") {
               return "";
             }
-            else if(vis.config.xAxisTitle === "Time" && selectedOption === "month") {
+            else if(vis.config.xAxisTitle === "Month") {
               let mon = d === "01" ? "January" : d === "02" ? "Feburary" : d === "03" ? "March" : d === "04" ? "April" : 
                         d === "05" ? "May" : d === "06" ? "June" : d === "07" ? "July" : d === "08" ? "August" :
                         d === "09" ? "September" : d === "10" ? "October" : d === "11" ? "November" : "December";
@@ -146,8 +146,8 @@ class Barchart {
     renderVis() {
       let vis = this;
       // var colorScale = vis._width > 800 ?  d => vis.colorScale(vis.colorValue(d)) : "#023020";
-      var colorScale = vis.config.xAxisTitle == "Time" && selectedOption == "month" ? d => vis.colorScale(vis.colorValue(d)) : 
-                      vis.config.xAxisTitle == "Flitered Data" ? d => vis.colorScale(vis.colorValue(d)) : "#023020";
+      var colorScale = vis.config.xAxisTitle == "Month" ? d => vis.colorScale(vis.colorValue(d)) : 
+                      vis.config.xAxisTitle == "Date" ? d => vis.colorScale(vis.colorValue(d)) : "#023020";
 
         // create tooltip element  
         const tooltip = d3.select("body")
@@ -167,7 +167,7 @@ class Barchart {
       vis.bars = vis.chart.selectAll('.bar')
           .data(vis.aggregatedData, vis.xValue)
         .join('rect')
-          .attr('class', d => filter.find(e => e === d.key) && selectedOption == "month" ? 'bar active' : "bar")
+          .attr('class', d => filter.find(e => e === d.key) ? 'bar active' : "bar")
           .attr('x', d => vis.xScale(vis.xValue(d)))
           .attr('width', vis.xScale.bandwidth())
           .attr('height', d => vis.height - vis.yScale(vis.yValue(d)))
@@ -203,7 +203,7 @@ class Barchart {
 
         vis.bars.on('click', function(event, d) {
           // vis.bars.remove();
-          if(vis.config.xAxisTitle == "Time" && selectedOption == "month") {
+          if(vis.config.xAxisTitle == "Month") {
             tooltip.html(``).style("visibility", "hidden");
             var isActive = false
             isActive = filter.find(e => e === d.key) // Check month is in filter
@@ -218,10 +218,37 @@ class Barchart {
             }
             filterData(); // Call global function to update scatter plot
           }
+          else if(vis.config.xAxisTitle != "Date") {
+            tooltip.html(``).style("visibility", "hidden");
+            var isActive = false
+            isActive = filter2.find(e => e[vis.config.xAxisTitle] == d.key)   
+            var obj = vis.config.xAxisTitle == 'Service Code' ? {"Service Code": d.key} : vis.config.xAxisTitle == 'Agency' ? 
+                      {"Agency": d.key} : vis.config.xAxisTitle == 'Difference in Days' ? {"Difference in Days": d.key} : 
+                      vis.config.xAxisTitle == 'Day of the week' ? {"Day of the week": d.key} : {"Zipcode": d.key}    
+            if(isActive) {     
+              filter2 = filter2.filter(f => f !== isActive); // Remove filter
+            }
+            else {
+              d3.select(this).attr("class", "bar active");
+              // Add to filter
+              filter2.push(obj)
+            }
+            filterData();
+          }
         });
 
       // Update axes
-      vis.xAxisG.call(vis.xAxis);
+      if(vis.config.xAxisTitle == "Zipcode") {
+        vis.xAxisG.call(vis.xAxis)
+          .selectAll("text")  
+          .style("text-anchor", "end")
+          .attr("dx", "-.8em")
+          .attr("dy", ".15em")
+          .attr("transform", "rotate(-65)");
+      }
+      else {
+        vis.xAxisG.call(vis.xAxis)
+      }
       vis.yAxisG.call(vis.yAxis);
     }
   }

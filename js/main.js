@@ -1,7 +1,9 @@
 let data, barchartA, barchartB, barchartC, linechartA, leafletMap, dayRollupG;
-let selectedOption = "month"
+let selectedOption = 'sc'
 let latLongArea = [];
 let filter = [];
+let filter2 = [];
+var currentData;
 processedData = []
 requestedDates = []
 
@@ -72,7 +74,8 @@ d3.tsv('data/Cincy311_2022_final.tsv')
 
     });
 
-   
+    currentData = [...processedData];
+
     console.log('req-date', requestedDates);
 
     requestedDates = requestedDates.sort(function (a,b) {return d3.ascending(a.DayOfWeek, b.DayOfWeek);});
@@ -93,7 +96,7 @@ d3.tsv('data/Cincy311_2022_final.tsv')
     var window_width = window.innerWidth;
     barchartA = new Barchart({
       parentElement: '#barchartA',
-      xAxisTitle: 'Time'
+      xAxisTitle: 'Month'
       }, data, requested_month, window_width / 2 - 50);
    
     barchartA.updateVis();
@@ -106,10 +109,13 @@ d3.tsv('data/Cincy311_2022_final.tsv')
     barchartB.updateVis();
 
 
+    processedData.sort(function(a,b){
+      return new Date(a.REQUESTED_DATE) - new Date(b.REQUESTED_DATE);
+    });
     dayRollupG = d3.rollups(processedData, v => v.length, d => d.REQUESTED_DATETIME.substring(5,10));
     barchartC = new Barchart({
       parentElement: '#barchartC',
-      xAxisTitle: 'Flitered Data'
+      xAxisTitle: 'Date'
     }, processedData, dayRollupG, window_width - 50);
     barchartC.updateVis();
  
@@ -118,31 +124,35 @@ d3.tsv('data/Cincy311_2022_final.tsv')
 
   d3.select("#selectGraph").on("change", function(d) {
     // recover the option that has been chosen
-    var selectedOption = d3.select(this).property("value")
+    selectedOption = d3.select(this).property("value")
+
+    currentData = currentData.sort(function (a,b) {return d3.ascending(new Date(a.REQUESTED_DATETIME).getDay()+1, new Date(b.REQUESTED_DATETIME).getDay()+1);});
+    currentData = currentData.sort(function (a,b) {return d3.ascending(((new Date(a.UPDATED_DATETIME).getTime() - new Date(a.REQUESTED_DATETIME).getTime()) / (1000 * 3600 * 24)),
+                                                                       ((new Date(b.UPDATED_DATETIME).getTime() - new Date(b.REQUESTED_DATETIME).getTime()) / (1000 * 3600 * 24)));});
    
     if(selectedOption == 'sc')
     {
-      barchartB.num_map = service_code_group;
+      barchartB.num_map = d3.rollups(currentData, v => v.length, d => d.SERVICE_CODE.substring(1,d.SERVICE_CODE.length - 1));
       barchartB.config.xAxisTitle = 'Service Code';
     }
     else if(selectedOption == 'agency')
     {
-      barchartB.num_map = agency_rollup;
+      barchartB.num_map = d3.rollups(currentData, v => v.length, d => d.AGENCY_RESPONSIBLE);
       barchartB.config.xAxisTitle = 'Agency';
     }
     else if(selectedOption == 'rtime')
     {
-      barchartB.num_map = response_time_rollup;
+      barchartB.num_map = d3.rollups(currentData, v => v.length, d => ((new Date(d.UPDATED_DATETIME).getTime() - new Date(d.REQUESTED_DATETIME).getTime()) / (1000 * 3600 * 24)));
       barchartB.config.xAxisTitle = 'Difference in Days';
     }
     else if(selectedOption == 'day')
     {
-      barchartB.num_map = dayOfWeek_rollup;
+      barchartB.num_map = d3.rollups(currentData, v => v.length, d => new Date(d.REQUESTED_DATETIME).getDay()+1);
       barchartB.config.xAxisTitle = 'Day of the week';
     }
     else if(selectedOption == 'zipcode')
     {
-      barchartB.num_map = zipcode_rollup;
+      barchartB.num_map = d3.rollups(currentData, v => v.length, d => d.ZIPCODE);
       barchartB.config.xAxisTitle = 'Zipcode';
     }
 
@@ -171,13 +181,43 @@ function clearFilters() {
 }
 
 function filterData() {
-  if (filter.length == 0 && latLongArea.length == 0) {
+  if (filter.length == 0 && filter2.length == 0 && latLongArea.length == 0) {
     document.getElementById("btn").disabled = true;
     // Reset Data to original
     barchartC.num_map = dayRollupG;
     leafletMap.data = processedData;
+    currentData = [...processedData];
+   
+    if(selectedOption == 'sc')
+    {
+      barchartB.num_map = service_code_group;
+      barchartB.config.xAxisTitle = 'Service Code';
+    }
+    else if(selectedOption == 'agency')
+    {
+      barchartB.num_map = agency_rollup;
+      barchartB.config.xAxisTitle = 'Agency';
+    }
+    else if(selectedOption == 'rtime')
+    {
+      barchartB.num_map = response_time_rollup;
+      barchartB.config.xAxisTitle = 'Difference in Days';
+    }
+    else if(selectedOption == 'day')
+    {
+      barchartB.num_map = dayOfWeek_rollup;
+      barchartB.config.xAxisTitle = 'Day of the week';
+    }
+    else if(selectedOption == 'zipcode')
+    {
+      barchartB.num_map = zipcode_rollup;
+      barchartB.config.xAxisTitle = 'Zipcode';
+    }
+
+    // Added to remove highlight on btn click
+    barchartA.updateVis();
   } 
-  else if(filter.length == 0) {
+  else if(filter.length == 0 && filter2.length == 0) {
     document.getElementById("btn").disabled = false;
     let newTempData = [];
     processedData.filter(function(d) {
@@ -189,6 +229,7 @@ function filterData() {
     });
     barchartC.num_map = d3.rollups(newTempData, v => v.length, d => d.REQUESTED_DATETIME.substring(5,10));
     leafletMap.data = newTempData;
+    currentData = [...newTempData];
   }
   else {
     document.getElementById("btn").disabled = false;
@@ -196,7 +237,7 @@ function filterData() {
     filter.sort();
     var tempData = [];
     filter.forEach(e => {
-      var tempData2 = processedData.filter(d => e === d.REQUESTED_DATETIME.substring(5,7));
+      var tempData2 = currentData.filter(d => e === d.REQUESTED_DATETIME.substring(5,7));
       tempData2.sort(function(a,b){
         // Turn your strings into dates, and then subtract them
         // to get a value that is either negative, positive, or zero.
@@ -205,28 +246,69 @@ function filterData() {
       tempData = tempData.concat(tempData2)
     });
 
+    currentData = tempData.length > 0 ? [...tempData] : [...currentData]
+
+    filter2.forEach(e => {
+      let key = Object.keys(e);
+      let val = e[key[0]];
+      var tempData2 = key == "Service Code" ? currentData.filter(d => val == d.SERVICE_CODE.substring(1,d.SERVICE_CODE.length - 1)) : 
+                      key == "Agency" ? currentData.filter(d => val === d.AGENCY_RESPONSIBLE) :
+                      key == "Difference in Days" ? currentData.filter(d => val == ((new Date(d.UPDATED_DATETIME).getTime() - new Date(d.REQUESTED_DATETIME).getTime()) / (1000 * 3600 * 24))) :
+                      key == "Day of the week" ? currentData.filter(d => val === new Date(d.REQUESTED_DATETIME).getDay()+1) :
+                      currentData.filter(d => val === d.ZIPCODE);
+
+      currentData = [...tempData2]
+    });
+
     console.log(latLongArea)
     if(latLongArea.length > 0) {
       let newTempData = [];
-      tempData.filter(function(d) {
+      currentData.filter(function(d) {
         if(d.LATITUDE <= parseFloat(latLongArea[3]) && d.LATITUDE >= parseFloat(latLongArea[1]) && 
            d.LONGITUDE >= parseFloat(latLongArea[0]) && d.LONGITUDE <= parseFloat(latLongArea[2]))
         {
           newTempData.push(d);
         }
       });
-      tempData = newTempData;
+      currentData = [...newTempData];
     }
 
-    leafletMap.data = tempData;
+    leafletMap.data = currentData;
     leafletMap.Dots.remove();
 
-    var dayRollup = d3.rollups(tempData, v => v.length, d => d.REQUESTED_DATETIME.substring(5,10));
+    var dayRollup = d3.rollups(currentData, v => v.length, d => d.REQUESTED_DATETIME.substring(5,10));
     barchartC.num_map = dayRollup;
     barchartC.bars.remove();
+
+    if(selectedOption == 'sc')
+    {
+      barchartB.num_map = d3.rollups(currentData, v => v.length, d => d.SERVICE_CODE.substring(1,d.SERVICE_CODE.length - 1));
+      barchartB.config.xAxisTitle = 'Service Code';
+    }
+    else if(selectedOption == 'agency')
+    {
+      barchartB.num_map = d3.rollups(currentData, v => v.length, d => d.AGENCY_RESPONSIBLE);
+      barchartB.config.xAxisTitle = 'Agency';
+    }
+    else if(selectedOption == 'rtime')
+    {
+      barchartB.num_map = d3.rollups(currentData, v => v.length, d => ((new Date(d.UPDATED_DATETIME).getTime() - new Date(d.REQUESTED_DATETIME).getTime()) / (1000 * 3600 * 24)));
+      barchartB.config.xAxisTitle = 'Difference in Days';
+    }
+    else if(selectedOption == 'day')
+    {
+      barchartB.num_map = d3.rollups(currentData, v => v.length, d => new Date(d.REQUESTED_DATETIME).getDay()+1);
+      barchartB.config.xAxisTitle = 'Day of the week';
+    }
+    else if(selectedOption == 'zipcode')
+    {
+      barchartB.num_map = d3.rollups(currentData, v => v.length, d => d.ZIPCODE);
+      barchartB.config.xAxisTitle = 'Zipcode';
+    }
   }
   // Update Chart
   barchartC.updateVis();
+  barchartB.updateVis();
 
   leafletMap.renderVis();
 }
