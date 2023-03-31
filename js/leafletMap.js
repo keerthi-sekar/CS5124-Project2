@@ -50,6 +50,14 @@ class LeafletMap {
 
     vis.theMap.setView([vis.data[0].LATITUDE, vis.data[0].LONGITUDE], 11)
 
+    vis.theMap.selectArea.enable();
+
+    vis.theMap.on('areaselected', (e) => {
+      console.log(e.bounds.toBBoxString()); // lon, lat, lon, lat
+      latLongArea = e.bounds.toBBoxString().split(',');
+      filterData();
+    });
+
     //initialize svg for d3 to add to map
     L.svg({clickable:true}).addTo(vis.theMap)// we have to make the svg layer clickable
     vis.overlay = d3.select(vis.theMap.getPanes().overlayPane)
@@ -108,7 +116,7 @@ class LeafletMap {
     var domainArr = colorBy === "Call" ? vis.callType : colorBy === "Agency" ? vis.agency : colorBy === "Date" ? vis.date : vis.res;
     var legendData = colorBy === "Call" ? vis.callTypeData : colorBy === "Agency" ? vis.agencyData : colorBy === "Date" ? vis.dateData : vis.resData;
 
-    vis.colorScale = d3.scaleOrdinal().range(d3.schemeCategory10)
+    vis.colorScale = d3.scaleOrdinal().range(colorBy === "Date" ? ["#6929c4", "#1192e8", "#808080", "#9f1853", "#198038", "#570408", "#002d9c", "#b28600", "#fa4d56", "#012749", "#009d9a","#a56eff"] : d3.schemeCategory10)
     .domain(domainArr);
 
     //redraw based on new Color

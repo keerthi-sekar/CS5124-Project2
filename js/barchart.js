@@ -46,17 +46,22 @@ class Barchart {
           .ticks(data)
           .tickSizeOuter(0)
           .tickFormat(function(d){
-            if(vis.config.xAxisTitle === "Flitered Data" && vis.num_map.length < 120) {
+            if(vis.config.xAxisTitle === "Date" && vis.num_map.length < 120) {
               return d.substring(3,5)
             }
-            else if(vis.config.xAxisTitle === "Flitered Data") {
+            else if(vis.config.xAxisTitle === "Date") {
               return "";
             }
-            else if(vis.config.xAxisTitle === "Time" && selectedOption === "month") {
+            else if(vis.config.xAxisTitle === "Month") {
               let mon = d === "01" ? "January" : d === "02" ? "Feburary" : d === "03" ? "March" : d === "04" ? "April" : 
                         d === "05" ? "May" : d === "06" ? "June" : d === "07" ? "July" : d === "08" ? "August" :
                         d === "09" ? "September" : d === "10" ? "October" : d === "11" ? "November" : "December";
               return mon;
+            }
+            else if(vis.config.xAxisTitle === "Day of the week") {
+              let day = d === 1 ? "Monday" : d === 2 ? "Tuesday" : d === 3 ? "Wednesday" : d === 4 ? "Thursday" :
+                        d === 5 ? "Friday" : d === 6 ? "Saturday" : "Sunday";
+              return day;
             }
             else {
               return d;
@@ -102,8 +107,8 @@ class Barchart {
       .style('text-anchor', 'end')
       //.text(vis.config.xAxisTitle);
 
-      // Color scale for Star Type
-      vis.colorScale = d3.scaleOrdinal().range(d3.schemeSet3)
+      // Color scale for month/day
+      vis.colorScale = d3.scaleOrdinal().range(["#6929c4", "#1192e8", "#808080", "#9f1853", "#198038", "#570408", "#002d9c", "#b28600", "#fa4d56", "#012749", "#009d9a","#a56eff"])
       .domain(["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"]);
     }
   
@@ -117,6 +122,9 @@ class Barchart {
         vis.data.reverse();
       }
       
+      if(vis.config.xAxisTitle == "zipcode") {
+        document.getElementById("zipLink").style.display = "block"
+      }
       // Prepare data: count number of trails in each difficulty category
       // i.e. [{ key: 'easy', count: 10 }, {key: 'intermediate', ...
       //const aggregatedDataMap = d3.rollups(vis.data, v => v.length, d => d.sy_snum);
@@ -146,8 +154,8 @@ class Barchart {
     renderVis() {
       let vis = this;
       // var colorScale = vis._width > 800 ?  d => vis.colorScale(vis.colorValue(d)) : "#023020";
-      var colorScale = vis.config.xAxisTitle == "Time" && selectedOption == "month" ? d => vis.colorScale(vis.colorValue(d)) : 
-                      vis.config.xAxisTitle == "Flitered Data" ? d => vis.colorScale(vis.colorValue(d)) : "#023020";
+      var colorScale = vis.config.xAxisTitle == "Month" ? d => vis.colorScale(vis.colorValue(d)) : 
+                      vis.config.xAxisTitle == "Date" ? d => vis.colorScale(vis.colorValue(d)) : "#023020";
 
         // create tooltip element  
         const tooltip = d3.select("body")
@@ -158,7 +166,7 @@ class Barchart {
         .style("padding", "2px 8px")
         .style("background", "#fff")
         .style("border", "1px solid #ddd")
-        .style("width", "100px")
+        .style("width", "120px")
         .style("box-shadow", "2px 2px 3px 0px rgb(92 92 92 / 0.5)")
         .style("font-size", "12px")
         .style("font-weight", "600");
@@ -167,25 +175,25 @@ class Barchart {
       vis.bars = vis.chart.selectAll('.bar')
           .data(vis.aggregatedData, vis.xValue)
         .join('rect')
-          .attr('class', d => filter.find(e => e === d.key) && selectedOption == "month" ? 'bar active' : "bar")
+          .attr('class', d => (filter.find(e => e === d.key) || filter2.find(e => e[vis.config.xAxisTitle] == d.key)) ? 'bar active' : "bar")
           .attr('x', d => vis.xScale(vis.xValue(d)))
           .attr('width', vis.xScale.bandwidth())
           .attr('height', d => vis.height - vis.yScale(vis.yValue(d)))
           .attr('y', d => vis.yScale(vis.yValue(d)))
-          // .attr('fill', '#023020')
           .style("fill", colorScale)
   
       vis.bars
         .on('mouseover', (event,d) => {
-          // d3.select('#bartooltip')
-          //   .style('display', 'block')
-          //   .style('left', (event.pageX + vis.config.tooltipPadding) + 'px')   
-          //   .style('top', (event.pageY + vis.config.tooltipPadding) + 'px')
-          //   .html(`
-            // <div class="tooltip-label">${d.key}</div>
-            //   <div class="tooltip-label">Calls: ${d.count}</div>
-          //   `);
-          tooltip.html(`<div class="tooltip-title">${vis.config.xAxisTitle}: ${d.key}</div>
+          let mon = d.key === "01" ? "January" : d.key === "02" ? "Feburary" : d.key === "03" ? "March" : d.key === "04" ? "April" : 
+          d.key === "05" ? "May" : d.key === "06" ? "June" : d.key === "07" ? "July" : d.key === "08" ? "August" :
+          d.key === "09" ? "September" : d.key === "10" ? "October" : d.key === "11" ? "November" : "December";
+
+          let day = d.key === 1 ? "Monday" : d.key === 2 ? "Tuesday" : d.key === 3 ? "Wednesday" : d.key === 4 ? "Thursday" :
+          d.key === 5 ? "Friday" : d.key === 6 ? "Saturday" : "Sunday";
+
+          let date = d.key + "-22";
+
+          tooltip.html(`<div class="tooltip-title">${vis.config.xAxisTitle}: ${vis.config.xAxisTitle === "Day of the week" ? day : vis.config.xAxisTitle === "Month" ? mon : vis.config.xAxisTitle === "Date" ? date : d.key}</div>
           <div class="tooltip-label">Calls: ${d.count}</div>`).style("visibility", "visible");
         })
         .on("mousemove", function(){
@@ -203,7 +211,7 @@ class Barchart {
 
         vis.bars.on('click', function(event, d) {
           // vis.bars.remove();
-          if(vis.config.xAxisTitle == "Time" && selectedOption == "month") {
+          if(vis.config.xAxisTitle == "Month") {
             tooltip.html(``).style("visibility", "hidden");
             var isActive = false
             isActive = filter.find(e => e === d.key) // Check month is in filter
@@ -218,10 +226,38 @@ class Barchart {
             }
             filterData(); // Call global function to update scatter plot
           }
+          else  {
+            tooltip.html(``).style("visibility", "hidden");
+            var isActive = false
+            isActive = filter2.find(e => e[vis.config.xAxisTitle] == d.key)   
+            var obj = vis.config.xAxisTitle == 'Service Code' ? {"Service Code": d.key} : vis.config.xAxisTitle == 'Agency' ? 
+                      {"Agency": d.key} : vis.config.xAxisTitle == 'Difference in Days' ? {"Difference in Days": d.key} : 
+                      vis.config.xAxisTitle == 'Day of the week' ? {"Day of the week": d.key} : 
+                      vis.config.xAxisTitle == 'Zipcode' ? {"Zipcode": d.key} : {"Date": d.key} ; 
+            if(isActive) {     
+              filter2 = filter2.filter(f => f !== isActive); // Remove filter
+            }
+            else {
+              d3.select(this).attr("class", "bar active");
+              // Add to filter
+              filter2.push(obj)
+            }
+            filterData();
+          }
         });
 
       // Update axes
-      vis.xAxisG.call(vis.xAxis);
+      if(vis.config.xAxisTitle == "Zipcode") {
+        vis.xAxisG.call(vis.xAxis)
+          .selectAll("text")  
+          .style("text-anchor", "end")
+          .attr("dx", "-.8em")
+          .attr("dy", ".15em")
+          .attr("transform", "rotate(-65)");
+      }
+      else {
+        vis.xAxisG.call(vis.xAxis)
+      }
       vis.yAxisG.call(vis.yAxis);
     }
   }
