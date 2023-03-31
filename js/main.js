@@ -1,11 +1,17 @@
-let data, barchartA, barchartB, barchartC, linechartA, leafletMap, dayRollupG;
+let data, barchartA, barchartB, barchartC, linechartA, leafletMap, dayRollupG, wordcloudA, description_rollup;
 let selectedOption = 'sc'
 let latLongArea = [];
+
 let filter = [];
 let filter2 = [];
 var currentData;
 processedData = []
 requestedDates = []
+descriptions = []
+
+let count = 0;
+let phrase_to_exclude = '"Request entered through the Web. Refer to Intake Questions for further description."';
+let unwanted_words = ['and', 'is', 'the', 'the ', 'for', 'to', 'on', 'had', 'that', 'of', 'not', 'or', 'in', 'an', 'no', 'it', 'by', '&', 'further', 'through', 'a'];
 
 //real tsv = Cincy311_2022_final.tsv
 //partial tsv = partial-data.tsv
@@ -16,7 +22,7 @@ d3.tsv('data/Cincy311_2022_final.tsv')
       d.STATUS = d.STATUS;
       d.SERVICE_NAME = d.SERVICE_NAME;
       d.SERVICE_CODE = d.SERVICE_CODE;
-      d.DESCRIPTION = d.DESCRIPTION;
+      d.DESCRIPTION = d.DESCRIPTION.toLowerCase();
       d.AGENCY_RESPONSIBLE = d.AGENCY_RESPONSIBLE;
       d.REQUESTED_DATETIME = d.REQUESTED_DATETIME;
       d.UPDATED_DATETIME = d.UPDATED_DATETIME;
@@ -29,6 +35,23 @@ d3.tsv('data/Cincy311_2022_final.tsv')
       d.UPDATED_DATE = d.UPDATED_DATE;
       d.LAST_TABLE_UPDATE = d.LAST_TABLE_UPDATE;
      
+      if(d.DESCRIPTION != phrase_to_exclude.toLowerCase() && d.DESCRIPTION != '" "' && count < 100)
+      {
+        des = d.DESCRIPTION.replace('/', '');
+        des = des.replace('"', '');
+        des = des.replace('\"', '');
+        des = des.replace('.', '');
+        des = des.replace(',', '');
+        
+        //console.log('des', des);
+        des = des.split(' ');
+        for(let i = 0; i < unwanted_words.length; i++)
+        {
+          des = des.filter(f => f !== unwanted_words[i]);
+        }
+        descriptions = descriptions.concat(des);
+        count = count + 1;
+      }
      
       // Filter data by existing lat/long and exp/req daterime fields, year 2022, and service codes BLD-RES, RCYCLNG, PTHOLE, SIDWLKH, TIRES
       var year = d.REQUESTED_DATETIME.substring(0,4);
@@ -59,17 +82,15 @@ d3.tsv('data/Cincy311_2022_final.tsv')
           'ServiceCode': parsed_finalServiceCode,
           'DATETIME': d.REQUESTED_DATETIME,
           'RequestedYear': d.REQUESTED_DATETIME.substring(0,4),
-          //'UpdatedYear': d.UPDATED_DATETIME.substring(0,4),
           'RequestedMonth': d.REQUESTED_DATETIME.substring(5,7),
-          //'UpdatedMonth': d.UPDATED_DATETIME.substring(5,7),
           'RequestedDay': d.REQUESTED_DATETIME.substring(8,10),
-          //'UpdatedDay': d.UPDATED_DATETIME.substring(8,10),
           'Zipcode': d.ZIPCODE,
           'Agency': d.AGENCY_RESPONSIBLE,
           'ReponseTime': d.RESPONSE_TIME,
           'DayOfWeek': dayOfWeek+1
         }
         requestedDates.push(req_date);
+       
       }
 
     });
@@ -77,7 +98,7 @@ d3.tsv('data/Cincy311_2022_final.tsv')
     currentData = [...processedData];
 
     console.log('req-date', requestedDates);
-
+    console.log(descriptions);
     requestedDates = requestedDates.sort(function (a,b) {return d3.ascending(a.DayOfWeek, b.DayOfWeek);});
     requestedDates = requestedDates.sort(function (a,b) {return d3.ascending(a.ReponseTime, b.ReponseTime);});
 
@@ -90,9 +111,11 @@ d3.tsv('data/Cincy311_2022_final.tsv')
     agency_rollup = d3.rollups(requestedDates, v => v.length, d => d.Agency);
     response_time_rollup = d3.rollups(requestedDates, v => v.length, d => d.ReponseTime);
     dayOfWeek_rollup = d3.rollups(requestedDates, v => v.length, d => d.DayOfWeek);
+    description_rollup = d3.rollups(descriptions, v => v.length, d => d);
+    console.log(description_rollup);
     // Initialize chart and then show it
     leafletMap = new LeafletMap({ parentElement: '#my-map'}, processedData);
-
+ 
     var window_width = window.innerWidth;
     barchartA = new Barchart({
       parentElement: '#barchartA',
@@ -107,6 +130,11 @@ d3.tsv('data/Cincy311_2022_final.tsv')
       }, data, service_code_group, window_width / 2 - 50);
    
     barchartB.updateVis();
+
+    wordcloudA = new WordCloud({
+      parentElement: '#wordcloud'
+    }, description_rollup)
+    wordcloudA.initVis();
 
 
     processedData.sort(function(a,b){
@@ -222,6 +250,12 @@ function filterData() {
     }
 
     document.getElementById("filters").innerHTML = `<h3>No filters applied</h3>`
+    document.getElementById("wordcloud").innerHTML = '';
+    document.getElementById("wordcloudDiv").innerHTML = '';
+    wordcloudA = new WordCloud({
+      parentElement: '#wordcloud'
+    }, description_rollup)
+    wordcloudA.initVis();
 
     // Added to remove highlight on btn click
     barchartA.updateVis();
@@ -272,6 +306,45 @@ function filterData() {
     {
       barchartB.num_map = d3.rollups(newTempData, v => v.length, d => d.ZIPCODE);
     }
+
+    // get wordcloud data
+    var tempDesc = [];
+    var limit = newTempData.length > 100 ? 100 : newTempData.length;
+    for(i = 0; i < limit; i++) {
+      if(newTempData[i].DESCRIPTION != phrase_to_exclude.toLowerCase() && newTempData[i].DESCRIPTION != '" "')
+      {
+        var des = newTempData[i].DESCRIPTION.replace('/', '');
+        des = des.replace('"', '');
+        des = des.replace('\"', '');
+        des = des.replace('.', '');
+        des = des.replace(',', '');
+        
+        //console.log('des', des);
+        des = des.split(' ');
+        for(let i = 0; i < unwanted_words.length; i++)
+        {
+          des = des.filter(f => f !== unwanted_words[i]);
+        }
+        tempDesc = tempDesc.concat(des);
+        count = count + 1;
+      }
+    }
+
+    var wordRollup = d3.rollups(tempDesc, v => v.length, d => d);
+    document.getElementById("wordcloud").innerHTML = '';
+    if(tempDesc.length == 0) {
+      var h3 = document.createElement("h3");
+      h3.innerHTML = "No Description Found";
+      document.getElementById("wordcloudDiv").append(h3);
+    }
+    else {
+      document.getElementById("wordcloudDiv").innerHTML = '';
+      wordcloudA = new WordCloud({
+        parentElement: '#wordcloud'
+      }, wordRollup)
+      wordcloudA.initVis();
+    }
+
     currentData = [...newTempData];
   }
   else {
@@ -392,6 +465,46 @@ function filterData() {
     {
       barchartB.num_map = d3.rollups(tempData, v => v.length, d => d.ZIPCODE);
     }
+
+    // get wordcloud data
+    var tempDesc = [];
+    var limit = tempData.length > 100 ? 100 : tempData.length;
+    for(i = 0; i < limit; i++) {
+      if(tempData[i].DESCRIPTION != phrase_to_exclude.toLowerCase() && tempData[i].DESCRIPTION != '" "')
+      {
+        var des = tempData[i].DESCRIPTION.replace('/', '');
+        des = des.replace('"', '');
+        des = des.replace('\"', '');
+        des = des.replace('.', '');
+        des = des.replace(',', '');
+        
+        //console.log('des', des);
+        des = des.split(' ');
+        for(let i = 0; i < unwanted_words.length; i++)
+        {
+          des = des.filter(f => f !== unwanted_words[i]);
+        }
+        tempDesc = tempDesc.concat(des);
+        count = count + 1;
+      }
+    }
+
+    var wordRollup = d3.rollups(tempDesc, v => v.length, d => d);
+    document.getElementById("wordcloud").innerHTML = '';
+    console.log(tempDesc.length)
+    if(tempDesc.length == 0) {
+      var h3 = document.createElement("h3");
+      h3.innerHTML = "No Description Found";
+      document.getElementById("wordcloudDiv").append(h3);
+    }
+    else {
+      document.getElementById("wordcloudDiv").innerHTML = '';
+      wordcloudA = new WordCloud({
+        parentElement: '#wordcloud'
+      }, wordRollup)
+      wordcloudA.initVis();
+    }
+
     currentData = [...tempData];
   }
   // Update Chart
