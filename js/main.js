@@ -11,7 +11,7 @@ descriptions = []
 
 let count = 0;
 let phrase_to_exclude = '"Request entered through the Web. Refer to Intake Questions for further description."';
-let unwanted_words = ['and', 'is', 'the', 'the ', 'for', 'to', 'on', 'had', 'that', 'of', 'not', 'or', 'in', 'an', 'no', 'it', 'by', '&', 'further', 'through'];
+let unwanted_words = ['and', 'is', 'the', 'the ', 'for', 'to', 'on', 'had', 'that', 'of', 'not', 'or', 'in', 'an', 'no', 'it', 'by', '&', 'further', 'through', 'a'];
 
 //real tsv = Cincy311_2022_final.tsv
 //partial tsv = partial-data.tsv
