@@ -113,6 +113,20 @@ li {
   background-color: #fff;
 }
 
+.fullcolumn2 {
+  float: left;
+  width: 99%;
+  height: 400px;
+  /* background-color: #f1f1f1; */
+  /* padding-left: 5px; */
+  box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.5);
+  margin-top: 10px;
+  margin-bottom: 10px;
+  margin-right: 10px;
+  padding: 5px;
+  background-color: #fff;
+}
+
 /* Right column */
 .rightcolumn {
   float: left;
