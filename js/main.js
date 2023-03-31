@@ -3,8 +3,10 @@ let selectedOption = "month"
 let filter = [];
 processedData = []
 requestedDates = []
-zipcodes = []
+descriptions = []
 
+let count = 0;
+let phrase_to_exclude = "Request entered through the Web. Refer to Intake Questions for further description.";
 //real tsv = Cincy311_2022_final.tsv
 //partial tsv = partial-data.tsv
 d3.tsv('data/Cincy311_2022_final.tsv')
@@ -27,6 +29,11 @@ d3.tsv('data/Cincy311_2022_final.tsv')
       d.UPDATED_DATE = d.UPDATED_DATE;
       d.LAST_TABLE_UPDATE = d.LAST_TABLE_UPDATE;
      
+      if(d.DESCRIPTION.toLowerCase().indexOf(phrase_to_exclude) === -1 && count < 100)
+      {
+        descriptions.push(d.DESCRIPTION);
+        count = count + 1;
+      }
      
       // Filter data by existing lat/long and exp/req daterime fields, year 2022, and service codes BLD-RES, RCYCLNG, PTHOLE, SIDWLKH, TIRES
       var year = d.REQUESTED_DATETIME.substring(0,4);
@@ -68,14 +75,14 @@ d3.tsv('data/Cincy311_2022_final.tsv')
           'DayOfWeek': dayOfWeek+1
         }
         requestedDates.push(req_date);
-        zipcodes.push(d.ZIPCODE);
+       
       }
 
     });
 
    
     console.log('req-date', requestedDates);
-    
+    console.log(descriptions);
     requestedDates = requestedDates.sort(function (a,b) {return d3.ascending(a.DayOfWeek, b.DayOfWeek);});
     requestedDates = requestedDates.sort(function (a,b) {return d3.ascending(a.ReponseTime, b.ReponseTime);});
 
@@ -108,7 +115,7 @@ d3.tsv('data/Cincy311_2022_final.tsv')
 
     wordcloudA = new WordCloud({
       parentElement: '#wordcloud'
-    }, zipcodes)
+    }, descriptions)
     wordcloudA.initVis();
 
 

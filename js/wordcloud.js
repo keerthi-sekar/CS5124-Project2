@@ -5,7 +5,7 @@ class WordCloud {
      * @param {Object}
      * @param {Array}
      */
-    constructor(_config, _map, _width) {
+    constructor(_config, _data, _map, _width) {
       // Configuration object with defaults
       this.config = {
         parentElement: _config.parentElement,
@@ -17,6 +17,7 @@ class WordCloud {
         xAxisTitle: _config.xAxisTitle || 'NaN',
         yAxisTitle: _config.yAxisTitle || 'Calls',
       }
+      this.data = _data;
       this.num_map = _map;
       this.initVis();
     }
@@ -60,7 +61,7 @@ class WordCloud {
       //   .text(function(d){return d.text;});
 
       vis.fill = d3.scaleOrdinal().range(d3.schemeCategory10)
-      var data = [
+      /* var data = [
         {text: "Hello", value:6260},
         {text: "happy", value:5370},
         {text: "beautiful", value:2480},
@@ -68,10 +69,15 @@ class WordCloud {
         {text: "unicorn", value:1250},
         {text: "glitter", value:3140},
         {text: "happy", value:990},
-        {text: "pie", value:4230}];
+        {text: "pie", value:4230}]; */
+
+      var data = vis.data.map(function(d) {
+        return {text: d, value: 10 + Math.random() * 90};
+      })
+      
 
       var layout = d3.layout.cloud()
-        .size([400, 300])
+        .size([800, 800])
         .words(data)
         .on("end", function() {
           d3.select("#wordcloud")
