@@ -9,8 +9,8 @@ class WordCloud {
       // Configuration object with defaults
       this.config = {
         parentElement: _config.parentElement,
-        containerWidth: _config.containerWidth || 400,
-        containerHeight: _config.containerHeight || 500,
+        containerWidth: _config.containerWidth || 1500,
+        containerHeight: _config.containerHeight || 600,
         margin: _config.margin || {top: 25, right: 20, bottom: 40, left: 50},
         reverseOrder: _config.reverseOrder || false,
         tooltipPadding: _config.tooltipPadding || 15,
@@ -78,7 +78,7 @@ class WordCloud {
       //console.log("data", data);
 
       var layout = d3.layout.cloud()
-        .size([800, 800])
+        .size([1500, 600])
         .words(data)
         .on("end", function() {
           d3.select("#wordcloud")
