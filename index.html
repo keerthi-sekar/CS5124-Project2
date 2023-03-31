@@ -5,6 +5,7 @@
     <link rel="icon" href="data:;base64,iVBORwOKGO=" />
     <link rel="stylesheet" href="css/leaflet.css">
     <link rel="stylesheet" href="css/style.css">
+    <link href="https://netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
 </head>
 <body>
     <div class="header">
@@ -18,18 +19,22 @@
         <a href="https://data.cincinnati-oh.gov/Thriving-Neighborhoods/Cincinnati-311-Non-Emergency-Service-Requests/4cjh-bm8b">Data Source</a>
     </div>
     <br> </br>
-
     <div>
-        <label style="font-size: medium">Color By: </label> 
-        <select name="colorBy" id="colorBy" onchange="colorChange()">
-            <option value="Call" >Call Type</option>
-            <option value="Agency" >Public Agency</option>
-            <option value="Date" >Date</option>
-            <option value="Response" >Response Time</option>
-        </select>
-        <input type="checkbox" id="AerialView" name="AerialView" value="AerialView" onchange="aerialClick(this)">
-        <label style="font-size: medium" for="AerialView">Aerial View</label><br>
-        <br/>
+        <div style="display: flex; justify-content: space-between; margin-right: 20px; margin-bottom: 10px; width: 80%;">
+            <div>
+                <label style="font-size: medium">Color By: </label> 
+                <select name="colorBy" id="colorBy" onchange="colorChange()">
+                    <option value="Call" >Call Type</option>
+                    <option value="Agency" >Public Agency</option>
+                    <option value="Date" >Date</option>
+                    <option value="Response" >Response Time</option>
+                </select>
+                <input type="checkbox" id="AerialView" name="AerialView" value="AerialView" onchange="aerialClick(this)">
+                <label style="font-size: medium" for="AerialView">Aerial View</label>
+                <i class="icon-info-sign" title="Ctrl + Click to brush the map" style="margin-left: 5px;"></i>
+            </div>
+            <button class="btn" id="btn" disabled="true" onclick="clearFilters()">Clear Filters</button>
+        </div>
         <div style="display: flex; ">
             <div class="map" id="my-map"></div>
             <div class="legend" id="legend"></div>
@@ -39,14 +44,14 @@
     <div class="row">
         <div class="leftcolumn">
         <div>
-            <p>All Time Calls Placed Over 2022 </p>
+            <h3>Calls Placed Over 2022: Months</h3>
             <br></br>
             <svg id="barchartA"></svg>
         </div>
         </div>
         <div class="rightcolumn">
         <div>
-            <p>Categories: All Time Overview</p>
+            <h3>Calls by Category</h3>
             <select id="selectGraph" style="font-size: large;">
                 <option value="sc">Service Code</option>
                 <option value="agency">Agency Responsible</option>
@@ -54,6 +59,9 @@
                 <option value="day">Day of the Week</option>
                 <option value="zipcode">Zipcode</option>
             </select>
+            <div id="zipLink" style="display: none;">
+                <a href="https://www.zipdatamaps.com/zipcodes-cincinnati-oh">Map of zipcodes</a>
+            </div>
             <br></br>
             <svg id="barchartB"></svg>
         </div>
@@ -61,7 +69,7 @@
     </div>
 
     <div class="fullcolumn">
-        <p>Filtered Data</p>
+        <h3>Calls Placed Over 2022: Days</h3>
         <svg id="barchartC"></svg>
     </div>
 
@@ -79,6 +87,7 @@
     <script src="js/barchart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-cloud/1.2.5/d3.layout.cloud.js"></script>
     <script src="js/wordcloud.js"></script>
+    <script src="js/Map.SelectArea.min.js"></script>
 
     <div id="tooltip"></div>
 

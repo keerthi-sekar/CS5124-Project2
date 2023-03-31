@@ -78,7 +78,7 @@ class WordCloud {
       //console.log("data", data);
 
       var layout = d3.layout.cloud()
-        .size([1800, 600])
+        .size([1500, 600])
         .words(data)
         .on("end", function() {
           d3.select("#wordcloud")
