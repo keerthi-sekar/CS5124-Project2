@@ -33,7 +33,7 @@ class WordCloud {
   
 
       // Initialize scales and axes
-      vis.layout = d3.cloud()
+      vis.layout = d3.layout.cloud()
         .size([vis.width, vis.height])
         .words(this.num_map.map(function(d, e) {return {text: d}}))
         .padding(5)
