@@ -11,7 +11,7 @@ class Barchart {
         parentElement: _config.parentElement,
         containerWidth: _config.containerWidth || _width,
         containerHeight: _config.containerHeight || 500,
-        margin: _config.margin || {top: 25, right: 20, bottom: 40, left: 50},
+        margin: _config.margin || {top: 25, right: 20, bottom: 60, left: 50},
         reverseOrder: _config.reverseOrder || false,
         tooltipPadding: _config.tooltipPadding || 15,
         xAxisTitle: _config.xAxisTitle || 'NaN',
@@ -144,6 +144,43 @@ class Barchart {
       // Set the scale input domains
       vis.xScale.domain(vis.aggregatedData.map(vis.xValue));
       vis.yScale.domain([0, d3.max(vis.aggregatedData, vis.yValue)]);
+
+      if(vis.config.xAxisTitle == "Date") {
+        vis.chart.append("text")
+          .attr("class", "xlabel")
+          .attr("text-anchor", "middle")
+          .attr("x",vis.width/2)
+          .attr("y", vis.height + 35)
+          .text("Day of the month");
+      }
+      else if(vis.config.xAxisTitle == "Month") {
+        vis.chart.append("text")
+          .attr("class", "xlabel")
+          .attr("text-anchor", "middle")
+          .attr("x",vis.width/2)
+          .attr("y", vis.height + 40)
+          .text("Month");
+      }
+      else if(vis.config.xAxisTitle == "Response Time") {
+        d3. select("#xlabel"). remove();
+        vis.chart.append("text")
+          .attr("class", "xlabel")
+          .attr("id", "xlabel")
+          .attr("text-anchor", "middle")
+          .attr("x",vis.width/2)
+          .attr("y", vis.height + 50)
+          .text("Response Time (in days)");
+      }
+      else {
+        d3. select("#xlabel"). remove();
+        vis.chart.append("text")
+          .attr("class", "xlabel")
+          .attr("id", "xlabel")
+          .attr("text-anchor", "middle")
+          .attr("x",vis.width/2)
+          .attr("y", vis.height + 50)
+          .text(vis.config.xAxisTitle);
+      }
   
       vis.renderVis();
     }
@@ -231,7 +268,7 @@ class Barchart {
             var isActive = false
             isActive = filter2.find(e => e[vis.config.xAxisTitle] == d.key)   
             var obj = vis.config.xAxisTitle == 'Service Code' ? {"Service Code": d.key} : vis.config.xAxisTitle == 'Agency' ? 
-                      {"Agency": d.key} : vis.config.xAxisTitle == 'Difference in Days' ? {"Difference in Days": d.key} : 
+                      {"Agency": d.key} : vis.config.xAxisTitle == 'Response Time' ? {"Response Time": d.key} : 
                       vis.config.xAxisTitle == 'Day of the week' ? {"Day of the week": d.key} : 
                       vis.config.xAxisTitle == 'Zipcode' ? {"Zipcode": d.key} : {"Date": d.key} ; 
             if(isActive) {     

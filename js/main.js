@@ -173,7 +173,7 @@ d3.tsv('data/Cincy311_2022_final.tsv')
     else if(selectedOption == 'rtime')
     {
       barchartB.num_map = d3.rollups(currentData, v => v.length, d => ((new Date(d.UPDATED_DATETIME).getTime() - new Date(d.REQUESTED_DATETIME).getTime()) / (1000 * 3600 * 24)));
-      barchartB.config.xAxisTitle = 'Difference in Days';
+      barchartB.config.xAxisTitle = 'Response Time';
       document.getElementById("zipLink").style.display = "none"
     }
     else if(selectedOption == 'day')
@@ -236,7 +236,7 @@ function filterData() {
     else if(selectedOption == 'rtime')
     {
       barchartB.num_map = response_time_rollup;
-      barchartB.config.xAxisTitle = 'Difference in Days';
+      barchartB.config.xAxisTitle = 'Response Time';
     }
     else if(selectedOption == 'day')
     {
@@ -384,7 +384,7 @@ function filterData() {
       let val = e[key[0]];
       var tempData2 = key == "Service Code" ? tempData.filter(d => val == d.SERVICE_CODE.substring(1,d.SERVICE_CODE.length - 1)) : 
                       key == "Agency" ? tempData.filter(d => val === d.AGENCY_RESPONSIBLE) :
-                      key == "Difference in Days" ? tempData.filter(d => val == ((new Date(d.UPDATED_DATETIME).getTime() - new Date(d.REQUESTED_DATETIME).getTime()) / (1000 * 3600 * 24))) :
+                      key == "Response Time" ? tempData.filter(d => val == ((new Date(d.UPDATED_DATETIME).getTime() - new Date(d.REQUESTED_DATETIME).getTime()) / (1000 * 3600 * 24))) :
                       key == "Day of the week" ? tempData.filter(d => val === new Date(d.REQUESTED_DATETIME).getDay()+1) :
                       key == "Zipcode" ? tempData.filter(d => val === d.ZIPCODE) :
                       tempData.filter(d => val === d.REQUESTED_DATETIME.substring(5,10));
@@ -393,7 +393,7 @@ function filterData() {
 
       var tempData3 = key == "Service Code" ? processedData.filter(d => val == d.SERVICE_CODE.substring(1,d.SERVICE_CODE.length - 1)) : 
                       key == "Agency" ? processedData.filter(d => val === d.AGENCY_RESPONSIBLE) :
-                      key == "Difference in Days" ? processedData.filter(d => val == ((new Date(d.UPDATED_DATETIME).getTime() - new Date(d.REQUESTED_DATETIME).getTime()) / (1000 * 3600 * 24))) :
+                      key == "Response Time" ? processedData.filter(d => val == ((new Date(d.UPDATED_DATETIME).getTime() - new Date(d.REQUESTED_DATETIME).getTime()) / (1000 * 3600 * 24))) :
                       key == "Day of the week" ? processedData.filter(d => val === new Date(d.REQUESTED_DATETIME).getDay()+1) :
                       key == "Zipcode" ? processedData.filter(d => val === d.ZIPCODE) : filter2Data.length > 0 ? filter2Data : processedData;
 
