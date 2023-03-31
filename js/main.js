@@ -32,7 +32,7 @@ d3.tsv('data/Cincy311_2022_final.tsv')
      
       // Filter data by existing lat/long and exp/req daterime fields, year 2022, and service codes BLD-RES, RCYCLNG, PTHOLE, SIDWLKH, TIRES
       var year = d.REQUESTED_DATETIME.substring(0,4);
-      if(d.LATITUDE && d.LONGITUDE && d.SERVICE_REQUEST_ID &&
+      if(d.LATITUDE && d.LONGITUDE && d.SERVICE_REQUEST_ID && d.ZIPCODE &&
         year == '2022' && d.EXPECTED_DATETIME && d.REQUESTED_DATETIME &&
         (d.SERVICE_CODE == '"BLD-RES"' || d.SERVICE_CODE == '"RCYCLNG"' ||
         d.SERVICE_CODE == '"PTHOLE"' || d.SERVICE_CODE == '"SIDWLKH"' || d.SERVICE_CODE == '"TIRES"')) {
@@ -154,6 +154,7 @@ d3.tsv('data/Cincy311_2022_final.tsv')
     {
       barchartB.num_map = d3.rollups(currentData, v => v.length, d => d.ZIPCODE);
       barchartB.config.xAxisTitle = 'Zipcode';
+      document.getElementById("zipLink").style.display = "block"
     }
 
     barchartB.updateVis();
@@ -176,6 +177,7 @@ function colorChange() {
 
 function clearFilters() {
   filter = [];
+  filter2 = [];
   latLongArea = [];
   filterData();
 }
@@ -186,6 +188,7 @@ function filterData() {
     // Reset Data to original
     barchartC.num_map = dayRollupG;
     leafletMap.data = processedData;
+    barchartA.num_map = requested_month;
     currentData = [...processedData];
    
     if(selectedOption == 'sc')
@@ -229,6 +232,32 @@ function filterData() {
     });
     barchartC.num_map = d3.rollups(newTempData, v => v.length, d => d.REQUESTED_DATETIME.substring(5,10));
     leafletMap.data = newTempData;
+    barchartA.num_map = d3.rollups(newTempData, v => v.length, d => d.REQUESTED_DATETIME.substring(5,7));
+    barchartA.bars.remove();
+
+    newTempData = newTempData.sort(function (a,b) {return d3.ascending(new Date(a.REQUESTED_DATETIME).getDay()+1, new Date(b.REQUESTED_DATETIME).getDay()+1);});
+    newTempData = newTempData.sort(function (a,b) {return d3.ascending(((new Date(a.UPDATED_DATETIME).getTime() - new Date(a.REQUESTED_DATETIME).getTime()) / (1000 * 3600 * 24)),
+                                                                       ((new Date(b.UPDATED_DATETIME).getTime() - new Date(b.REQUESTED_DATETIME).getTime()) / (1000 * 3600 * 24)));});
+    if(selectedOption == 'sc')
+    {
+      barchartB.num_map = d3.rollups(newTempData, v => v.length, d => d.SERVICE_CODE.substring(1,d.SERVICE_CODE.length - 1));
+    }
+    else if(selectedOption == 'agency')
+    {
+      barchartB.num_map = d3.rollups(newTempData, v => v.length, d => d.AGENCY_RESPONSIBLE);
+    }
+    else if(selectedOption == 'rtime')
+    {
+      barchartB.num_map = d3.rollups(newTempData, v => v.length, d => ((new Date(d.UPDATED_DATETIME).getTime() - new Date(d.REQUESTED_DATETIME).getTime()) / (1000 * 3600 * 24)));
+    }
+    else if(selectedOption == 'day')
+    {
+      barchartB.num_map = d3.rollups(newTempData, v => v.length, d => new Date(d.REQUESTED_DATETIME).getDay()+1);
+    }
+    else if(selectedOption == 'zipcode')
+    {
+      barchartB.num_map = d3.rollups(newTempData, v => v.length, d => d.ZIPCODE);
+    }
     currentData = [...newTempData];
   }
   else {
@@ -237,7 +266,7 @@ function filterData() {
     filter.sort();
     var tempData = [];
     filter.forEach(e => {
-      var tempData2 = currentData.filter(d => e === d.REQUESTED_DATETIME.substring(5,7));
+      var tempData2 = processedData.filter(d => e === d.REQUESTED_DATETIME.substring(5,7));
       tempData2.sort(function(a,b){
         // Turn your strings into dates, and then subtract them
         // to get a value that is either negative, positive, or zero.
@@ -245,70 +274,90 @@ function filterData() {
       });
       tempData = tempData.concat(tempData2)
     });
+    tempData = tempData.length > 0 ? [...tempData] : [...processedData]
 
-    currentData = tempData.length > 0 ? [...tempData] : [...currentData]
-
+    var filter2Data = []
     filter2.forEach(e => {
       let key = Object.keys(e);
       let val = e[key[0]];
-      var tempData2 = key == "Service Code" ? currentData.filter(d => val == d.SERVICE_CODE.substring(1,d.SERVICE_CODE.length - 1)) : 
-                      key == "Agency" ? currentData.filter(d => val === d.AGENCY_RESPONSIBLE) :
-                      key == "Difference in Days" ? currentData.filter(d => val == ((new Date(d.UPDATED_DATETIME).getTime() - new Date(d.REQUESTED_DATETIME).getTime()) / (1000 * 3600 * 24))) :
-                      key == "Day of the week" ? currentData.filter(d => val === new Date(d.REQUESTED_DATETIME).getDay()+1) :
-                      currentData.filter(d => val === d.ZIPCODE);
+      console.log(key)
+      console.log(val)
+      var tempData2 = key == "Service Code" ? tempData.filter(d => val == d.SERVICE_CODE.substring(1,d.SERVICE_CODE.length - 1)) : 
+                      key == "Agency" ? tempData.filter(d => val === d.AGENCY_RESPONSIBLE) :
+                      key == "Difference in Days" ? tempData.filter(d => val == ((new Date(d.UPDATED_DATETIME).getTime() - new Date(d.REQUESTED_DATETIME).getTime()) / (1000 * 3600 * 24))) :
+                      key == "Day of the week" ? tempData.filter(d => val === new Date(d.REQUESTED_DATETIME).getDay()+1) :
+                      key == "Zipcode" ? tempData.filter(d => val === d.ZIPCODE) :
+                      tempData.filter(d => val === d.REQUESTED_DATETIME.substring(5,10));
 
-      currentData = [...tempData2]
+      tempData = [...tempData2]
+
+      var tempData3 = key == "Service Code" ? processedData.filter(d => val == d.SERVICE_CODE.substring(1,d.SERVICE_CODE.length - 1)) : 
+                      key == "Agency" ? processedData.filter(d => val === d.AGENCY_RESPONSIBLE) :
+                      key == "Difference in Days" ? processedData.filter(d => val == ((new Date(d.UPDATED_DATETIME).getTime() - new Date(d.REQUESTED_DATETIME).getTime()) / (1000 * 3600 * 24))) :
+                      key == "Day of the week" ? processedData.filter(d => val === new Date(d.REQUESTED_DATETIME).getDay()+1) :
+                      key == "Zipcode" ? processedData.filter(d => val === d.ZIPCODE) : filter2Data.length > 0 ? filter2Data : processedData;
+
+      filter2Data = [...tempData3]
     });
-
-    console.log(latLongArea)
+    
     if(latLongArea.length > 0) {
       let newTempData = [];
-      currentData.filter(function(d) {
+      tempData.filter(function(d) {
         if(d.LATITUDE <= parseFloat(latLongArea[3]) && d.LATITUDE >= parseFloat(latLongArea[1]) && 
            d.LONGITUDE >= parseFloat(latLongArea[0]) && d.LONGITUDE <= parseFloat(latLongArea[2]))
         {
           newTempData.push(d);
         }
       });
-      currentData = [...newTempData];
+      tempData = [...newTempData];
     }
 
-    leafletMap.data = currentData;
+    leafletMap.data = tempData;
     leafletMap.Dots.remove();
 
-    var dayRollup = d3.rollups(currentData, v => v.length, d => d.REQUESTED_DATETIME.substring(5,10));
+    var dayRollup = d3.rollups(tempData, v => v.length, d => d.REQUESTED_DATETIME.substring(5,10));
     barchartC.num_map = dayRollup;
     barchartC.bars.remove();
 
+    if(filter2.length > 0) {
+      var monthRollup = d3.rollups(filter2Data, v => v.length, d => d.REQUESTED_DATETIME.substring(5,7));
+      barchartA.num_map = monthRollup;
+      barchartA.bars.remove();
+    }
+    if(filter2.length == 0) {
+      barchartA.num_map = requested_month;
+      barchartA.bars.remove();
+    }
+
+    tempData = tempData.sort(function (a,b) {return d3.ascending(new Date(a.REQUESTED_DATETIME).getDay()+1, new Date(b.REQUESTED_DATETIME).getDay()+1);});
+    tempData = tempData.sort(function (a,b) {return d3.ascending(((new Date(a.UPDATED_DATETIME).getTime() - new Date(a.REQUESTED_DATETIME).getTime()) / (1000 * 3600 * 24)),
+                                                                       ((new Date(b.UPDATED_DATETIME).getTime() - new Date(b.REQUESTED_DATETIME).getTime()) / (1000 * 3600 * 24)));});
     if(selectedOption == 'sc')
     {
-      barchartB.num_map = d3.rollups(currentData, v => v.length, d => d.SERVICE_CODE.substring(1,d.SERVICE_CODE.length - 1));
-      barchartB.config.xAxisTitle = 'Service Code';
+      barchartB.num_map = d3.rollups(tempData, v => v.length, d => d.SERVICE_CODE.substring(1,d.SERVICE_CODE.length - 1));
     }
     else if(selectedOption == 'agency')
     {
-      barchartB.num_map = d3.rollups(currentData, v => v.length, d => d.AGENCY_RESPONSIBLE);
-      barchartB.config.xAxisTitle = 'Agency';
+      barchartB.num_map = d3.rollups(tempData, v => v.length, d => d.AGENCY_RESPONSIBLE);
     }
     else if(selectedOption == 'rtime')
     {
-      barchartB.num_map = d3.rollups(currentData, v => v.length, d => ((new Date(d.UPDATED_DATETIME).getTime() - new Date(d.REQUESTED_DATETIME).getTime()) / (1000 * 3600 * 24)));
-      barchartB.config.xAxisTitle = 'Difference in Days';
+      barchartB.num_map = d3.rollups(tempData, v => v.length, d => ((new Date(d.UPDATED_DATETIME).getTime() - new Date(d.REQUESTED_DATETIME).getTime()) / (1000 * 3600 * 24)));
     }
     else if(selectedOption == 'day')
     {
-      barchartB.num_map = d3.rollups(currentData, v => v.length, d => new Date(d.REQUESTED_DATETIME).getDay()+1);
-      barchartB.config.xAxisTitle = 'Day of the week';
+      barchartB.num_map = d3.rollups(tempData, v => v.length, d => new Date(d.REQUESTED_DATETIME).getDay()+1);
     }
     else if(selectedOption == 'zipcode')
     {
-      barchartB.num_map = d3.rollups(currentData, v => v.length, d => d.ZIPCODE);
-      barchartB.config.xAxisTitle = 'Zipcode';
+      barchartB.num_map = d3.rollups(tempData, v => v.length, d => d.ZIPCODE);
     }
+    currentData = [...tempData];
   }
   // Update Chart
   barchartC.updateVis();
   barchartB.updateVis();
+  barchartA.updateVis();
 
   leafletMap.renderVis();
 }

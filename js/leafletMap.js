@@ -116,7 +116,7 @@ class LeafletMap {
     var domainArr = colorBy === "Call" ? vis.callType : colorBy === "Agency" ? vis.agency : colorBy === "Date" ? vis.date : vis.res;
     var legendData = colorBy === "Call" ? vis.callTypeData : colorBy === "Agency" ? vis.agencyData : colorBy === "Date" ? vis.dateData : vis.resData;
 
-    vis.colorScale = d3.scaleOrdinal().range(d3.schemeCategory10)
+    vis.colorScale = d3.scaleOrdinal().range(colorBy === "Date" ? ["#6929c4", "#1192e8", "#808080", "#9f1853", "#198038", "#570408", "#002d9c", "#b28600", "#fa4d56", "#012749", "#009d9a","#a56eff"] : d3.schemeCategory10)
     .domain(domainArr);
 
     //redraw based on new Color
