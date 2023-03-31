@@ -7,7 +7,7 @@ descriptions = []
 
 let count = 0;
 let phrase_to_exclude = '"Request entered through the Web. Refer to Intake Questions for further description."';
-let unwanted_words = ['and', 'is', 'the', 'the ', 'for', 'to', 'on', 'had', 'that', 'of', 'not', 'or', 'in', 'an', 'no'];
+let unwanted_words = ['and', 'is', 'the', 'the ', 'for', 'to', 'on', 'had', 'that', 'of', 'not', 'or', 'in', 'an', 'no', 'it', 'by', '&', 'further', 'through'];
 
 //real tsv = Cincy311_2022_final.tsv
 //partial tsv = partial-data.tsv
@@ -36,12 +36,15 @@ d3.tsv('data/Cincy311_2022_final.tsv')
         des = d.DESCRIPTION.replace('/', '');
         des = des.replace('"', '');
         des = des.replace('\"', '');
-        for(let i = 0; i < unwanted_words.length; i++)
-        {
-          des = des.replace(unwanted_words[i], '');
-        }
+        des = des.replace('.', '');
+        des = des.replace(',', '');
+        
         //console.log('des', des);
         des = des.split(' ');
+        for(let i = 0; i < unwanted_words.length; i++)
+        {
+          des = des.filter(f => f !== unwanted_words[i]);
+        }
         descriptions = descriptions.concat(des);
         count = count + 1;
       }
