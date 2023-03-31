@@ -72,9 +72,10 @@ class WordCloud {
         {text: "pie", value:4230}]; */
 
       var data = vis.data.map(function(d) {
-        return {text: d, value: 10 + Math.random() * 90};
+        return {text: d[0], value: d[1]*100};
       })
-      
+
+      //console.log("data", data);
 
       var layout = d3.layout.cloud()
         .size([800, 800])

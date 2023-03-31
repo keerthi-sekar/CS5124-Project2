@@ -1,4 +1,4 @@
-let data, barchartA, barchartB, barchartC, linechartA, leafletMap, dayRollupG, wordcloudA;
+let data, barchartA, barchartB, barchartC, linechartA, leafletMap, dayRollupG, wordcloudA, description_rollup;
 let selectedOption = "month"
 let filter = [];
 processedData = []
@@ -31,7 +31,12 @@ d3.tsv('data/Cincy311_2022_final.tsv')
      
       if(d.DESCRIPTION.toLowerCase().indexOf(phrase_to_exclude) === -1 && count < 100)
       {
-        descriptions.push(d.DESCRIPTION);
+        des = d.DESCRIPTION.replace('/', '');
+        des = des.replace('"', '');
+        des = des.replace('\"', '');
+        //console.log('des', des);
+        des = des.split(' ');
+        descriptions = descriptions.concat(des);
         count = count + 1;
       }
      
@@ -64,11 +69,8 @@ d3.tsv('data/Cincy311_2022_final.tsv')
           'ServiceCode': parsed_finalServiceCode,
           'DATETIME': d.REQUESTED_DATETIME,
           'RequestedYear': d.REQUESTED_DATETIME.substring(0,4),
-          //'UpdatedYear': d.UPDATED_DATETIME.substring(0,4),
           'RequestedMonth': d.REQUESTED_DATETIME.substring(5,7),
-          //'UpdatedMonth': d.UPDATED_DATETIME.substring(5,7),
           'RequestedDay': d.REQUESTED_DATETIME.substring(8,10),
-          //'UpdatedDay': d.UPDATED_DATETIME.substring(8,10),
           'Zipcode': d.ZIPCODE,
           'Agency': d.AGENCY_RESPONSIBLE,
           'ReponseTime': d.RESPONSE_TIME,
@@ -95,6 +97,8 @@ d3.tsv('data/Cincy311_2022_final.tsv')
     agency_rollup = d3.rollups(requestedDates, v => v.length, d => d.Agency);
     response_time_rollup = d3.rollups(requestedDates, v => v.length, d => d.ReponseTime);
     dayOfWeek_rollup = d3.rollups(requestedDates, v => v.length, d => d.DayOfWeek);
+    description_rollup = d3.rollups(descriptions, v => v.length, d => d);
+    console.log(description_rollup);
     // Initialize chart and then show it
     leafletMap = new LeafletMap({ parentElement: '#my-map'}, processedData);
  
@@ -115,7 +119,7 @@ d3.tsv('data/Cincy311_2022_final.tsv')
 
     wordcloudA = new WordCloud({
       parentElement: '#wordcloud'
-    }, descriptions)
+    }, description_rollup)
     wordcloudA.initVis();
 
 
