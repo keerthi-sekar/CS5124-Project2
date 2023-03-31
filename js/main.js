@@ -245,6 +245,13 @@ function filterData() {
       barchartB.config.xAxisTitle = 'Zipcode';
     }
 
+    document.getElementById("wordcloud").innerHTML = '';
+    document.getElementById("wordcloudDiv").innerHTML = '';
+    wordcloudA = new WordCloud({
+      parentElement: '#wordcloud'
+    }, description_rollup)
+    wordcloudA.initVis();
+
     // Added to remove highlight on btn click
     barchartA.updateVis();
   } 
@@ -286,6 +293,45 @@ function filterData() {
     {
       barchartB.num_map = d3.rollups(newTempData, v => v.length, d => d.ZIPCODE);
     }
+
+    // get wordcloud data
+    var tempDesc = [];
+    var limit = newTempData.length > 100 ? 100 : newTempData.length;
+    for(i = 0; i < limit; i++) {
+      if(newTempData[i].DESCRIPTION != phrase_to_exclude.toLowerCase() && newTempData[i].DESCRIPTION != '" "')
+      {
+        var des = newTempData[i].DESCRIPTION.replace('/', '');
+        des = des.replace('"', '');
+        des = des.replace('\"', '');
+        des = des.replace('.', '');
+        des = des.replace(',', '');
+        
+        //console.log('des', des);
+        des = des.split(' ');
+        for(let i = 0; i < unwanted_words.length; i++)
+        {
+          des = des.filter(f => f !== unwanted_words[i]);
+        }
+        tempDesc = tempDesc.concat(des);
+        count = count + 1;
+      }
+    }
+
+    var wordRollup = d3.rollups(tempDesc, v => v.length, d => d);
+    document.getElementById("wordcloud").innerHTML = '';
+    if(tempDesc.length == 0) {
+      var h3 = document.createElement("h3");
+      h3.innerHTML = "No Description Found";
+      document.getElementById("wordcloudDiv").append(h3);
+    }
+    else {
+      document.getElementById("wordcloudDiv").innerHTML = '';
+      wordcloudA = new WordCloud({
+        parentElement: '#wordcloud'
+      }, wordRollup)
+      wordcloudA.initVis();
+    }
+
     currentData = [...newTempData];
   }
   else {
@@ -308,8 +354,6 @@ function filterData() {
     filter2.forEach(e => {
       let key = Object.keys(e);
       let val = e[key[0]];
-      console.log(key)
-      console.log(val)
       var tempData2 = key == "Service Code" ? tempData.filter(d => val == d.SERVICE_CODE.substring(1,d.SERVICE_CODE.length - 1)) : 
                       key == "Agency" ? tempData.filter(d => val === d.AGENCY_RESPONSIBLE) :
                       key == "Difference in Days" ? tempData.filter(d => val == ((new Date(d.UPDATED_DATETIME).getTime() - new Date(d.REQUESTED_DATETIME).getTime()) / (1000 * 3600 * 24))) :
@@ -380,6 +424,46 @@ function filterData() {
     {
       barchartB.num_map = d3.rollups(tempData, v => v.length, d => d.ZIPCODE);
     }
+
+    // get wordcloud data
+    var tempDesc = [];
+    var limit = tempData.length > 100 ? 100 : tempData.length;
+    for(i = 0; i < limit; i++) {
+      if(tempData[i].DESCRIPTION != phrase_to_exclude.toLowerCase() && tempData[i].DESCRIPTION != '" "')
+      {
+        var des = tempData[i].DESCRIPTION.replace('/', '');
+        des = des.replace('"', '');
+        des = des.replace('\"', '');
+        des = des.replace('.', '');
+        des = des.replace(',', '');
+        
+        //console.log('des', des);
+        des = des.split(' ');
+        for(let i = 0; i < unwanted_words.length; i++)
+        {
+          des = des.filter(f => f !== unwanted_words[i]);
+        }
+        tempDesc = tempDesc.concat(des);
+        count = count + 1;
+      }
+    }
+
+    var wordRollup = d3.rollups(tempDesc, v => v.length, d => d);
+    document.getElementById("wordcloud").innerHTML = '';
+    console.log(tempDesc.length)
+    if(tempDesc.length == 0) {
+      var h3 = document.createElement("h3");
+      h3.innerHTML = "No Description Found";
+      document.getElementById("wordcloudDiv").append(h3);
+    }
+    else {
+      document.getElementById("wordcloudDiv").innerHTML = '';
+      wordcloudA = new WordCloud({
+        parentElement: '#wordcloud'
+      }, wordRollup)
+      wordcloudA.initVis();
+    }
+
     currentData = [...tempData];
   }
   // Update Chart
