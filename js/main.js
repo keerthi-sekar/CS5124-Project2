@@ -162,21 +162,25 @@ d3.tsv('data/Cincy311_2022_final.tsv')
     {
       barchartB.num_map = d3.rollups(currentData, v => v.length, d => d.SERVICE_CODE.substring(1,d.SERVICE_CODE.length - 1));
       barchartB.config.xAxisTitle = 'Service Code';
+      document.getElementById("zipLink").style.display = "none"
     }
     else if(selectedOption == 'agency')
     {
       barchartB.num_map = d3.rollups(currentData, v => v.length, d => d.AGENCY_RESPONSIBLE);
       barchartB.config.xAxisTitle = 'Agency';
+      document.getElementById("zipLink").style.display = "none"
     }
     else if(selectedOption == 'rtime')
     {
       barchartB.num_map = d3.rollups(currentData, v => v.length, d => ((new Date(d.UPDATED_DATETIME).getTime() - new Date(d.REQUESTED_DATETIME).getTime()) / (1000 * 3600 * 24)));
-      barchartB.config.xAxisTitle = 'Difference in Days';
+      barchartB.config.xAxisTitle = 'Response Time';
+      document.getElementById("zipLink").style.display = "none"
     }
     else if(selectedOption == 'day')
     {
       barchartB.num_map = d3.rollups(currentData, v => v.length, d => new Date(d.REQUESTED_DATETIME).getDay()+1);
       barchartB.config.xAxisTitle = 'Day of the week';
+      document.getElementById("zipLink").style.display = "none"
     }
     else if(selectedOption == 'zipcode')
     {
@@ -232,7 +236,7 @@ function filterData() {
     else if(selectedOption == 'rtime')
     {
       barchartB.num_map = response_time_rollup;
-      barchartB.config.xAxisTitle = 'Difference in Days';
+      barchartB.config.xAxisTitle = 'Response Time';
     }
     else if(selectedOption == 'day')
     {
@@ -245,6 +249,7 @@ function filterData() {
       barchartB.config.xAxisTitle = 'Zipcode';
     }
 
+    document.getElementById("filters").innerHTML = `<h3>No filters applied</h3>`
     document.getElementById("wordcloud").innerHTML = '';
     document.getElementById("wordcloudDiv").innerHTML = '';
     wordcloudA = new WordCloud({
@@ -269,6 +274,14 @@ function filterData() {
     leafletMap.data = newTempData;
     barchartA.num_map = d3.rollups(newTempData, v => v.length, d => d.REQUESTED_DATETIME.substring(5,7));
     barchartA.bars.remove();
+
+    var filterTab = document.getElementById("filters");
+    filterTab.innerHTML = '';
+    var ul = document.createElement("ul");
+    var li = document.createElement("li");
+    li.innerHTML = `Map Brush`;
+    ul.appendChild(li);
+    filterTab.appendChild(ul)
 
     newTempData = newTempData.sort(function (a,b) {return d3.ascending(new Date(a.REQUESTED_DATETIME).getDay()+1, new Date(b.REQUESTED_DATETIME).getDay()+1);});
     newTempData = newTempData.sort(function (a,b) {return d3.ascending(((new Date(a.UPDATED_DATETIME).getTime() - new Date(a.REQUESTED_DATETIME).getTime()) / (1000 * 3600 * 24)),
@@ -336,6 +349,21 @@ function filterData() {
   }
   else {
     document.getElementById("btn").disabled = false;
+
+    var filterTab = document.getElementById("filters");
+    filterTab.innerHTML = '';
+    var ul = document.createElement("ul");
+    filter.forEach(e => {
+      var li = document.createElement("li");
+      let mon = e === "01" ? "January" : e === "02" ? "Feburary" : e === "03" ? "March" : e === "04" ? "April" : 
+                e === "05" ? "May" : e === "06" ? "June" : e === "07" ? "July" : e === "08" ? "August" :
+                e === "09" ? "September" : e === "10" ? "October" : e === "11" ? "November" : "December";
+
+      li.innerHTML = `Month: ${mon}`;
+      ul.appendChild(li);
+    });
+    // filterTab.appendChild(ul)
+
     // Set Data to only contain what is in filter
     filter.sort();
     var tempData = [];
@@ -356,7 +384,7 @@ function filterData() {
       let val = e[key[0]];
       var tempData2 = key == "Service Code" ? tempData.filter(d => val == d.SERVICE_CODE.substring(1,d.SERVICE_CODE.length - 1)) : 
                       key == "Agency" ? tempData.filter(d => val === d.AGENCY_RESPONSIBLE) :
-                      key == "Difference in Days" ? tempData.filter(d => val == ((new Date(d.UPDATED_DATETIME).getTime() - new Date(d.REQUESTED_DATETIME).getTime()) / (1000 * 3600 * 24))) :
+                      key == "Response Time" ? tempData.filter(d => val == ((new Date(d.UPDATED_DATETIME).getTime() - new Date(d.REQUESTED_DATETIME).getTime()) / (1000 * 3600 * 24))) :
                       key == "Day of the week" ? tempData.filter(d => val === new Date(d.REQUESTED_DATETIME).getDay()+1) :
                       key == "Zipcode" ? tempData.filter(d => val === d.ZIPCODE) :
                       tempData.filter(d => val === d.REQUESTED_DATETIME.substring(5,10));
@@ -365,11 +393,20 @@ function filterData() {
 
       var tempData3 = key == "Service Code" ? processedData.filter(d => val == d.SERVICE_CODE.substring(1,d.SERVICE_CODE.length - 1)) : 
                       key == "Agency" ? processedData.filter(d => val === d.AGENCY_RESPONSIBLE) :
-                      key == "Difference in Days" ? processedData.filter(d => val == ((new Date(d.UPDATED_DATETIME).getTime() - new Date(d.REQUESTED_DATETIME).getTime()) / (1000 * 3600 * 24))) :
+                      key == "Response Time" ? processedData.filter(d => val == ((new Date(d.UPDATED_DATETIME).getTime() - new Date(d.REQUESTED_DATETIME).getTime()) / (1000 * 3600 * 24))) :
                       key == "Day of the week" ? processedData.filter(d => val === new Date(d.REQUESTED_DATETIME).getDay()+1) :
                       key == "Zipcode" ? processedData.filter(d => val === d.ZIPCODE) : filter2Data.length > 0 ? filter2Data : processedData;
 
       filter2Data = [...tempData3]
+    });
+
+    filter2.forEach(e => {
+      let key = Object.keys(e);
+      let val = e[key[0]];
+      var li = document.createElement("li");
+
+      li.innerHTML = `${key}: ${val}`;
+      ul.appendChild(li);
     });
     
     if(latLongArea.length > 0) {
@@ -382,7 +419,11 @@ function filterData() {
         }
       });
       tempData = [...newTempData];
+      var li = document.createElement("li");
+      li.innerHTML = `Map Brush`;
+      ul.appendChild(li);
     }
+    filterTab.appendChild(ul)
 
     leafletMap.data = tempData;
     leafletMap.Dots.remove();
@@ -472,4 +513,25 @@ function filterData() {
   barchartA.updateVis();
 
   leafletMap.renderVis();
+}
+
+function openTab(evt, idName) {
+  // Declare all variables
+  var i, tabcontent, tablinks;
+
+  // Get all elements with class="tabcontent" and hide them
+  tabcontent = document.getElementsByClassName("tabcontent");
+  for (i = 0; i < tabcontent.length; i++) {
+    tabcontent[i].style.display = "none";
+  }
+
+  // Get all elements with class="tablinks" and remove the class "active"
+  tablinks = document.getElementsByClassName("tablinks");
+  for (i = 0; i < tablinks.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" active", "");
+  }
+
+  // Show the current tab, and add an "active" class to the button that opened the tab
+  document.getElementById(idName).style.display = "block";
+  evt.currentTarget.className += " active";
 }
