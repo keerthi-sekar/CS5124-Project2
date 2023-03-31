@@ -7,6 +7,8 @@ descriptions = []
 
 let count = 0;
 let phrase_to_exclude = "Request entered through the Web. Refer to Intake Questions for further description.";
+let unwanted_words = ['and', 'is', 'the', 'for', 'to', 'on', 'had', 'that', 'of', 'not', 'or', 'in', 'an'];
+
 //real tsv = Cincy311_2022_final.tsv
 //partial tsv = partial-data.tsv
 d3.tsv('data/Cincy311_2022_final.tsv')
@@ -29,11 +31,15 @@ d3.tsv('data/Cincy311_2022_final.tsv')
       d.UPDATED_DATE = d.UPDATED_DATE;
       d.LAST_TABLE_UPDATE = d.LAST_TABLE_UPDATE;
      
-      if(d.DESCRIPTION.toLowerCase().indexOf(phrase_to_exclude) === -1 && count < 100)
+      if(d.DESCRIPTION != phrase_to_exclude && count < 100)
       {
         des = d.DESCRIPTION.replace('/', '');
         des = des.replace('"', '');
         des = des.replace('\"', '');
+        for(let i = 0; i < unwanted_words.length; i++)
+        {
+          des = des.replace(unwanted_words[i], '');
+        }
         //console.log('des', des);
         des = des.split(' ');
         descriptions = descriptions.concat(des);
