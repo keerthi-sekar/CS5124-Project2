@@ -7,7 +7,7 @@ descriptions = []
 
 let count = 0;
 let phrase_to_exclude = '"Request entered through the Web. Refer to Intake Questions for further description."';
-let unwanted_words = ['and', 'is', 'the', 'for', 'to', 'on', 'had', 'that', 'of', 'not', 'or', 'in', 'an'];
+let unwanted_words = ['and', 'is', 'the', 'the ', 'for', 'to', 'on', 'had', 'that', 'of', 'not', 'or', 'in', 'an', 'no'];
 
 //real tsv = Cincy311_2022_final.tsv
 //partial tsv = partial-data.tsv
@@ -18,7 +18,7 @@ d3.tsv('data/Cincy311_2022_final.tsv')
       d.STATUS = d.STATUS;
       d.SERVICE_NAME = d.SERVICE_NAME;
       d.SERVICE_CODE = d.SERVICE_CODE;
-      d.DESCRIPTION = d.DESCRIPTION;
+      d.DESCRIPTION = d.DESCRIPTION.toLowerCase();
       d.AGENCY_RESPONSIBLE = d.AGENCY_RESPONSIBLE;
       d.REQUESTED_DATETIME = d.REQUESTED_DATETIME;
       d.UPDATED_DATETIME = d.UPDATED_DATETIME;
@@ -31,7 +31,7 @@ d3.tsv('data/Cincy311_2022_final.tsv')
       d.UPDATED_DATE = d.UPDATED_DATE;
       d.LAST_TABLE_UPDATE = d.LAST_TABLE_UPDATE;
      
-      if(d.DESCRIPTION != phrase_to_exclude && d.DESCRIPTION != '" "' && count < 100)
+      if(d.DESCRIPTION != phrase_to_exclude.toLowerCase() && d.DESCRIPTION != '" "' && count < 100)
       {
         des = d.DESCRIPTION.replace('/', '');
         des = des.replace('"', '');
