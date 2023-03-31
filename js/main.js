@@ -134,21 +134,25 @@ d3.tsv('data/Cincy311_2022_final.tsv')
     {
       barchartB.num_map = d3.rollups(currentData, v => v.length, d => d.SERVICE_CODE.substring(1,d.SERVICE_CODE.length - 1));
       barchartB.config.xAxisTitle = 'Service Code';
+      document.getElementById("zipLink").style.display = "none"
     }
     else if(selectedOption == 'agency')
     {
       barchartB.num_map = d3.rollups(currentData, v => v.length, d => d.AGENCY_RESPONSIBLE);
       barchartB.config.xAxisTitle = 'Agency';
+      document.getElementById("zipLink").style.display = "none"
     }
     else if(selectedOption == 'rtime')
     {
       barchartB.num_map = d3.rollups(currentData, v => v.length, d => ((new Date(d.UPDATED_DATETIME).getTime() - new Date(d.REQUESTED_DATETIME).getTime()) / (1000 * 3600 * 24)));
       barchartB.config.xAxisTitle = 'Difference in Days';
+      document.getElementById("zipLink").style.display = "none"
     }
     else if(selectedOption == 'day')
     {
       barchartB.num_map = d3.rollups(currentData, v => v.length, d => new Date(d.REQUESTED_DATETIME).getDay()+1);
       barchartB.config.xAxisTitle = 'Day of the week';
+      document.getElementById("zipLink").style.display = "none"
     }
     else if(selectedOption == 'zipcode')
     {
