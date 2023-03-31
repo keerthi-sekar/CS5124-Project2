@@ -1,8 +1,9 @@
-let data, barchartA, barchartB, barchartC, linechartA, leafletMap, dayRollupG;
+let data, barchartA, barchartB, barchartC, linechartA, leafletMap, dayRollupG, wordcloudA;
 let selectedOption = "month"
 let filter = [];
 processedData = []
 requestedDates = []
+zipcodes = []
 
 //real tsv = Cincy311_2022_final.tsv
 //partial tsv = partial-data.tsv
@@ -67,13 +68,14 @@ d3.tsv('data/Cincy311_2022_final.tsv')
           'DayOfWeek': dayOfWeek+1
         }
         requestedDates.push(req_date);
+        zipcodes.push(d.ZIPCODE);
       }
 
     });
 
    
     console.log('req-date', requestedDates);
-
+    
     requestedDates = requestedDates.sort(function (a,b) {return d3.ascending(a.DayOfWeek, b.DayOfWeek);});
     requestedDates = requestedDates.sort(function (a,b) {return d3.ascending(a.ReponseTime, b.ReponseTime);});
 
@@ -88,7 +90,7 @@ d3.tsv('data/Cincy311_2022_final.tsv')
     dayOfWeek_rollup = d3.rollups(requestedDates, v => v.length, d => d.DayOfWeek);
     // Initialize chart and then show it
     leafletMap = new LeafletMap({ parentElement: '#my-map'}, processedData);
-
+ 
     var window_width = window.innerWidth;
     barchartA = new Barchart({
       parentElement: '#barchartA',
@@ -103,6 +105,11 @@ d3.tsv('data/Cincy311_2022_final.tsv')
       }, data, service_code_group, window_width / 2 - 50);
    
     barchartB.updateVis();
+
+    wordcloudA = new WordCloud({
+      parentElement: '#wordcloud'
+    }, zipcodes)
+    wordcloudA.initVis();
 
 
     dayRollupG = d3.rollups(processedData, v => v.length, d => d.REQUESTED_DATETIME.substring(5,10));
