@@ -37,7 +37,16 @@
         </div>
         <div style="display: flex; ">
             <div class="map" id="my-map"></div>
-            <div class="legend" id="legend"></div>
+            <div class="legend">
+                <div class="tab">
+                    <button class="tablinks active" onclick="openTab(event, 'legend')">Map Legend</button>
+                    <button class="tablinks" onclick="openTab(event, 'filters')">Filters Applied</button>
+                  </div>
+                <div id="legend" class="tabcontent active" style="display: block;"></div>
+                <div id="filters" class="tabcontent">
+                    <h3>No filters applied</h3>
+                </div>
+            </div>
         </div>
     </div>
 
